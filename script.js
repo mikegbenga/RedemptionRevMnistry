@@ -1,659 +1,610 @@
-/* ════════════════════════════════════════════════════════════════
-   RRMI · Premium Interactions v2.0
-   Sacred Luxury — Obsidian & Gold
-   ════════════════════════════════════════════════════════════════ */
-'use strict';
+/* ═══════════════════════════════════════════════════════
+   RRMI v7 — Main Script
+   ═══════════════════════════════════════════════════════ */
 
-document.addEventListener('DOMContentLoaded', function () {
-  initNavbar();
-  initHeroSlider();
-  initScrollReveal();
-  initScrollSpy();
-  initStatCounters();
-  initTestimonials();
-  initGallery();
-  initCountdown();
-  initForms();
-  initGiveAmounts();
-  initGiveModal();
-  initMagneticButtons();
-  setFooterYear();
-  initCMSContent();
-});
+(function () {
+  'use strict';
 
-/* ── NAVBAR ─────────────────────────────────────────────────── */
-function initNavbar() {
-  var nav       = document.getElementById('navbar');
-  var hamburger = document.getElementById('hamburger');
-  var navLinks  = document.getElementById('navLinks');
+  /* ── SEED DATA ─────────────────────────────────────── */
+  const SEED = {
+    sermons: [],   // published sermons live in content.js
+    events: [
+      { id: 1, title: "Pastor's Birthday Celebration & Thanksgiving Service", date: "2025-02-14", time: "10:00 AM", location: "RRMI Main Auditorium", category: "Special", featured: true, description: "Join us as we celebrate the life and ministry of our beloved Senior Pastor, Apostle Itoro Isaac James." },
+      { id: 2, title: "Annual Convention — Open Heavens 2025", date: "2025-03-15", time: "9:00 AM", location: "RRMI Grounds, Uyo", category: "Convention", featured: false, description: "A powerful 3-day annual convention with ministers from across the globe." },
+      { id: 3, title: "Youth Revival — Generation on Fire", date: "2025-02-28", time: "5:00 PM", location: "RRMI Auditorium", category: "Youth", featured: false, description: "A special revival meeting for young people aged 15–35." },
+      { id: 4, title: "Women of Destiny Conference", date: "2025-03-08", time: "8:00 AM", location: "RRMI Hall", category: "Conference", featured: false, description: "Empowering women to walk in purpose and destiny." }
+    ],
+    gallery: [],       // published photos live in content.js
+    testimonials: [],  // published testimonies live in content.js
+    giveCategories: [
+      { id: 1, icon: "🙏", title: "Tithes", desc: "Honor God with the first tenth of your increase." },
+      { id: 2, icon: "🌾", title: "Offerings", desc: "Give generously as your heart leads you." },
+      { id: 3, icon: "🤝", title: "Partnership", desc: "Partner with our global vision for souls." },
+      { id: 4, icon: "🏗️", title: "Building Fund", desc: "Support the expansion of God's house." }
+    ]
+  };
 
-  window.addEventListener('scroll', function () {
-    nav.classList.toggle('scrolled', window.scrollY > 60);
-  }, { passive: true });
-
-  if (hamburger) {
-    hamburger.addEventListener('click', function () {
-      var open = navLinks.classList.toggle('open');
-      hamburger.classList.toggle('open', open);
-      hamburger.setAttribute('aria-expanded', open);
-    });
-  }
-  document.querySelectorAll('.nav-links a').forEach(function (a) {
-    a.addEventListener('click', function () {
-      navLinks.classList.remove('open');
-      hamburger && hamburger.classList.remove('open');
-    });
-  });
-  document.addEventListener('click', function (e) {
-    if (nav && !nav.contains(e.target)) {
-      navLinks && navLinks.classList.remove('open');
-      hamburger && hamburger.classList.remove('open');
+  function seedData() {
+    if (!localStorage.getItem('rrmi_seeded')) {
+      localStorage.setItem('rrmi_sermons', JSON.stringify(SEED.sermons));
+      localStorage.setItem('rrmi_events', JSON.stringify(SEED.events));
+      localStorage.setItem('rrmi_gallery', JSON.stringify(SEED.gallery));
+      localStorage.setItem('rrmi_testimonials', JSON.stringify(SEED.testimonials));
+      localStorage.setItem('rrmi_give_categories', JSON.stringify(SEED.giveCategories));
+      localStorage.setItem('rrmi_seeded', '1');
     }
-  });
-}
-
-/* ── HERO SLIDER ─────────────────────────────────────────────── */
-function initHeroSlider() {
-  var slides = document.querySelectorAll('.hero-slide');
-  var dots   = document.querySelectorAll('.hero-dots .dot');
-  var current = 0;
-  var timer;
-
-  function goTo(idx) {
-    slides[current].classList.remove('active');
-    dots[current] && dots[current].classList.remove('active');
-    current = (idx + slides.length) % slides.length;
-    slides[current].classList.add('active');
-    dots[current] && dots[current].classList.add('active');
   }
 
-  function startAuto() { timer = setInterval(function () { goTo(current + 1); }, 6500); }
-  function stopAuto()  { clearInterval(timer); }
+  function getLS(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+    catch { return fallback; }
+  }
 
-  dots.forEach(function (dot, i) {
-    dot.addEventListener('click', function () { stopAuto(); goTo(i); startAuto(); });
-  });
-
-  startAuto();
-}
-
-/* ── SCROLL REVEAL ───────────────────────────────────────────── */
-function initScrollReveal() {
-  var els = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
-
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
+  /* ── PUBLISHED CONTENT (content.js) ────────────────── */
+  // Sermons, gallery and testimonies come from content.js so every visitor
+  // sees them. Items added in the admin panel (saved in that browser only)
+  // are appended so the admin can preview them before publishing.
+  const PUBLISHED = window.RRMI_CONTENT || {};
+  const CONTENT_VERSION = '2026-11-20-cleared';
+  function clearOldDemoContent() {
+    try {
+      if (localStorage.getItem('rrmi_content_version') !== CONTENT_VERSION) {
+        ['rrmi_sermons', 'rrmi_gallery', 'rrmi_testimonials']
+          .forEach(k => localStorage.setItem(k, '[]'));
+        localStorage.setItem('rrmi_content_version', CONTENT_VERSION);
       }
+    } catch (e) { /* storage blocked: published content still shows */ }
+  }
+  function getContent(type, lsKey) {
+    const pub = Array.isArray(PUBLISHED[type]) ? PUBLISHED[type] : [];
+    const local = getLS(lsKey, []);
+    return pub.concat(Array.isArray(local) ? local : []);
+  }
+  const ICONS = {
+    play: '<path d="m10 8 6 4-6 4V8z"/><circle cx="12" cy="12" r="10"/>',
+    camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+    quote: '<path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/>'
+  };
+  function emptyState(icon, title, text, action) {
+    return `<div class="empty-state">
+      <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[icon]}</svg></div>
+      <h3 class="empty-title">${title}</h3>
+      <p class="empty-text">${text}</p>
+      ${action || ''}
+    </div>`;
+  }
+
+  /* ── FLASH POPUP ───────────────────────────────────── */
+  function initFlash() {
+    if (sessionStorage.getItem('flash_shown')) return;
+    const overlay = document.getElementById('flashOverlay');
+    if (!overlay) return;
+
+    // Check admin config
+    const cfg = getLS('rrmi_flash_cfg', null);
+    if (cfg && cfg.enabled === false) return;
+
+    overlay.style.display = 'flex';
+    sessionStorage.setItem('flash_shown', '1');
+
+    const closeBtn = overlay.querySelector('.flash-close');
+    if (closeBtn) closeBtn.addEventListener('click', () => {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity .3s ease';
+      setTimeout(() => overlay.remove(), 300);
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-  els.forEach(function (el) { observer.observe(el); });
-}
-
-/* ── SCROLL SPY ──────────────────────────────────────────────── */
-function initScrollSpy() {
-  var sections = document.querySelectorAll('section[id]');
-  var links    = document.querySelectorAll('.nav-links a');
-  var navH     = 80;
-
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        var id = entry.target.getAttribute('id');
-        links.forEach(function (a) {
-          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
-        });
-      }
-    });
-  }, { rootMargin: '-' + navH + 'px 0px -55% 0px' });
-
-  sections.forEach(function (s) { observer.observe(s); });
-}
-
-/* ── STAT COUNTERS ───────────────────────────────────────────── */
-function initStatCounters() {
-  var counters = document.querySelectorAll('.stat-num[data-target]');
-
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (!entry.isIntersecting) return;
-      var el = entry.target;
-      var target = parseInt(el.dataset.target, 10);
-      var dur = 2200;
-      var step = 16;
-      var inc = target / (dur / step);
-      var current = 0;
-      var timer = setInterval(function () {
-        current += inc;
-        if (current >= target) { current = target; clearInterval(timer); }
-        el.textContent = Math.floor(current);
-      }, step);
-      observer.unobserve(el);
-    });
-  }, { threshold: 0.5 });
-
-  counters.forEach(function (c) { observer.observe(c); });
-}
-
-/* ── TESTIMONIALS ────────────────────────────────────────────── */
-function initTestimonials() {
-  var slides   = document.querySelectorAll('.testimonial-slide');
-  var dotsWrap = document.getElementById('testDots');
-  var prevBtn  = document.getElementById('testPrev');
-  var nextBtn  = document.getElementById('testNext');
-  if (!slides.length) return;
-
-  var current = 0;
-  var timer;
-
-  if (dotsWrap) {
-    slides.forEach(function (_, i) {
-      var d = document.createElement('button');
-      d.className = 'test-dot' + (i === 0 ? ' active' : '');
-      d.setAttribute('aria-label', 'Testimonial ' + (i + 1));
-      d.addEventListener('click', function () { stopAuto(); goTo(i); startAuto(); });
-      dotsWrap.appendChild(d);
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeBtn && closeBtn.click();
     });
   }
 
-  var dotEls = dotsWrap ? dotsWrap.querySelectorAll('.test-dot') : [];
+  /* ── NAVBAR ────────────────────────────────────────── */
+  function initNavbar() {
+    const nav = document.querySelector('.navbar');
+    if (!nav) return;
 
-  function goTo(idx) {
-    slides[current].classList.remove('active');
-    dotEls[current] && dotEls[current].classList.remove('active');
-    current = (idx + slides.length) % slides.length;
-    slides[current].classList.add('active');
-    dotEls[current] && dotEls[current].classList.add('active');
-  }
+    const onScroll = () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
 
-  function startAuto() { timer = setInterval(function () { goTo(current + 1); }, 5200); }
-  function stopAuto()  { clearInterval(timer); }
-
-  prevBtn && prevBtn.addEventListener('click', function () { stopAuto(); goTo(current - 1); startAuto(); });
-  nextBtn && nextBtn.addEventListener('click', function () { stopAuto(); goTo(current + 1); startAuto(); });
-
-  /* Swipe */
-  var startX = 0;
-  var track = document.querySelector('.testimonial-track');
-  if (track) {
-    track.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
-    track.addEventListener('touchend',   function (e) {
-      var diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) { stopAuto(); goTo(diff > 0 ? current + 1 : current - 1); startAuto(); }
-    });
-  }
-
-  startAuto();
-}
-
-/* ── GALLERY ─────────────────────────────────────────────────── */
-function initGallery() {
-  var items   = Array.from(document.querySelectorAll('.gallery-item'));
-  var filters = document.querySelectorAll('.gf-btn');
-  var lb      = document.getElementById('lightbox');
-  var lbImg   = document.getElementById('lbImg');
-  var lbClose = document.getElementById('lbClose');
-  var lbPrev  = document.getElementById('lbPrev');
-  var lbNext  = document.getElementById('lbNext');
-
-  var visible = items.slice();
-  var current = 0;
-
-  filters.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      filters.forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      var cat = btn.dataset.filter;
-      items.forEach(function (item) {
-        item.style.display = (cat === 'all' || item.dataset.cat === cat) ? '' : 'none';
+    // Hamburger
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    if (hamburger && navLinks) {
+      hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        navLinks.classList.toggle('open');
       });
-      visible = items.filter(function (i) { return i.style.display !== 'none'; });
-    });
-  });
+      navLinks.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        navLinks.classList.remove('open');
+      }));
+    }
 
-  items.forEach(function (item) {
-    item.addEventListener('click', function () {
-      current = visible.indexOf(item);
-      if (current < 0) return;
-      openLB(current);
-    });
-  });
-
-  function openLB(idx) {
-    var src = visible[idx] && visible[idx].style.backgroundImage.replace(/url\(['"]?(.+?)['"]?\)/, '$1');
-    if (!src) return;
-    lbImg.src = src;
-    lb.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    current = idx;
-  }
-  function closeLB() {
-    lb.classList.remove('open');
-    document.body.style.overflow = '';
-    lbImg.src = '';
+    // Active link on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const links = document.querySelectorAll('.nav-link[href^="#"]');
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const a = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+          if (a) a.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -40% 0px' });
+    sections.forEach(s => io.observe(s));
   }
 
-  lbClose && lbClose.addEventListener('click', closeLB);
-  lb      && lb.addEventListener('click', function (e) { if (e.target === lb) closeLB(); });
-  lbPrev  && lbPrev.addEventListener('click', function () { openLB((current - 1 + visible.length) % visible.length); });
-  lbNext  && lbNext.addEventListener('click', function () { openLB((current + 1) % visible.length); });
+  /* ── HERO SLIDER ───────────────────────────────────── */
+  function initHeroSlider() {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.hdot');
+    if (!slides.length) return;
 
-  document.addEventListener('keydown', function (e) {
-    if (!lb || !lb.classList.contains('open')) return;
-    if (e.key === 'Escape')      closeLB();
-    if (e.key === 'ArrowLeft')   lbPrev && lbPrev.click();
-    if (e.key === 'ArrowRight')  lbNext && lbNext.click();
-  });
-}
+    let cur = 0;
+    function goTo(n) {
+      slides[cur].classList.remove('active');
+      dots[cur] && dots[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active');
+      dots[cur] && dots[cur].classList.add('active');
+    }
+    dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+    setInterval(() => goTo(cur + 1), 6000);
+  }
 
-/* ── COUNTDOWN ───────────────────────────────────────────────── */
-function initCountdown() {
-  var container = document.querySelector('[data-date]');
-  if (!container) return;
-  var target = new Date(container.dataset.date + 'T09:00:00');
-  var dEl = document.getElementById('cd1-d');
-  var hEl = document.getElementById('cd1-h');
-  var mEl = document.getElementById('cd1-m');
-  if (!dEl) return;
-  function pad(n) { return String(n).padStart(2, '0'); }
-  function update() {
-    var diff = target - new Date();
-    if (diff <= 0) { dEl.textContent = hEl.textContent = mEl.textContent = '00'; return; }
-    dEl.textContent = pad(Math.floor(diff / 86400000));
-    hEl.textContent = pad(Math.floor((diff % 86400000) / 3600000));
-    mEl.textContent = pad(Math.floor((diff % 3600000) / 60000));
-  }
-  update();
-  setInterval(update, 60000);
-}
+  /* ── HERO CANVAS PARTICLES ─────────────────────────── */
+  function initCanvas() {
+    const canvas = document.getElementById('heroCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [], raf;
 
-/* ── FORMS ───────────────────────────────────────────────────── */
-function initForms() {
-  var pForm = document.getElementById('prayerForm');
-  if (pForm) {
-    pForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var name = pForm.querySelector('#pName').value.trim();
-      var req  = pForm.querySelector('#pRequest').value.trim();
-      if (!name || !req) return;
-      var s = document.getElementById('prayerSuccess');
-      if (s) s.style.display = 'block';
-      pForm.querySelectorAll('input,textarea,select').forEach(function (el) { el.value = ''; });
-      setTimeout(function () { if (s) s.style.display = 'none'; }, 6000);
-    });
-  }
-  var cForm = document.getElementById('contactForm');
-  if (cForm) {
-    cForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var ok = true;
-      cForm.querySelectorAll('[required]').forEach(function (inp) { if (!inp.value.trim()) ok = false; });
-      if (!ok) return;
-      var s = document.getElementById('contactSuccess');
-      if (s) s.style.display = 'block';
-      cForm.querySelectorAll('input,textarea,select').forEach(function (el) { el.value = ''; });
-      setTimeout(function () { if (s) s.style.display = 'none'; }, 6000);
-    });
-  }
-  var nForm = document.getElementById('newsletter');
-  if (nForm) {
-    nForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var inp = nForm.querySelector('input[type=email]');
-      if (inp && inp.value) {
-        inp.value = '';
-        var btn = nForm.querySelector('button');
-        if (btn) { btn.textContent = 'Subscribed ✓'; setTimeout(function () { btn.textContent = 'Subscribe'; }, 3000); }
+    function resize() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.r = Math.random() * 1.5 + .3;
+        this.alpha = Math.random() * .5 + .1;
+        this.speed = Math.random() * .3 + .05;
+        this.dx = (Math.random() - .5) * .3;
+        this.dy = -this.speed;
       }
-    });
-  }
-}
-
-/* ── GIVE AMOUNTS ────────────────────────────────────────────── */
-function initGiveAmounts() {
-  var btns   = document.querySelectorAll('.amt-btn');
-  var custom = document.getElementById('customAmt');
-  btns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      btns.forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      if (custom) custom.value = '';
-    });
-  });
-  if (custom) {
-    custom.addEventListener('input', function () {
-      if (custom.value) btns.forEach(function (b) { b.classList.remove('active'); });
-    });
-  }
-}
-
-/* ── GIVE MODAL (bank transfer details — no payment gateway yet) ─ */
-/* Delegated on document so it also catches CMS-rendered give buttons (renderCMSGive). */
-function initGiveModal() {
-  var modal = document.getElementById('giveModal');
-  if (!modal) return;
-  var closeBtn  = document.getElementById('giveModalClose');
-  var contextEl = document.getElementById('giveModalContext');
-  var copyBtn   = document.getElementById('giveCopyBtn');
-  var acctNum   = document.getElementById('giveAcctNum');
-
-  function openGiveModal(label) {
-    if (contextEl) contextEl.textContent = label || 'Partner With The Vision';
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeGiveModal() {
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  document.addEventListener('click', function (e) {
-    var trigger = e.target.closest && e.target.closest('.js-give-trigger');
-    if (!trigger) return;
-    e.preventDefault();
-    var label = trigger.dataset.give;
-    if (!label) {
-      var activeAmt = document.querySelector('.amt-btn.active');
-      var custom = document.getElementById('customAmt');
-      if (custom && custom.value.trim()) {
-        label = 'Quick Gift · ₦' + custom.value.trim();
-      } else if (activeAmt) {
-        label = 'Quick Gift · ' + activeAmt.textContent.trim();
-      } else {
-        label = 'Quick Gift';
+      update() {
+        this.x += this.dx; this.y += this.dy;
+        this.alpha -= .0008;
+        if (this.y < 0 || this.alpha <= 0) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(227,166,59,${this.alpha})`;
+        ctx.fill();
       }
     }
-    openGiveModal(label);
-  });
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
 
-  closeBtn && closeBtn.addEventListener('click', closeGiveModal);
-  modal.addEventListener('click', function (e) { if (e.target === modal) closeGiveModal(); });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && modal.classList.contains('open')) closeGiveModal();
-  });
-
-  copyBtn && copyBtn.addEventListener('click', function () {
-    var text = acctNum ? acctNum.textContent.trim() : '';
-    if (!text) return;
-    function markCopied() {
-      var orig = copyBtn.textContent;
-      copyBtn.textContent = 'Copied ✓';
-      copyBtn.classList.add('copied');
-      setTimeout(function () { copyBtn.textContent = orig; copyBtn.classList.remove('copied'); }, 2000);
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      raf = requestAnimationFrame(loop);
     }
-    function fallbackCopy() {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); markCopied(); } catch (err) {}
-      document.body.removeChild(ta);
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(markCopied).catch(fallbackCopy);
-    } else {
-      fallbackCopy();
-    }
-  });
-}
+    loop();
+  }
 
-/* ── MAGNETIC BUTTONS (subtle luxury effect) ─────────────────── */
-var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* ── SCROLL REVEAL ─────────────────────────────────── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right, .reveal-hero');
+    if (!els.length) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    els.forEach(el => io.observe(el));
+  }
 
-function initMagneticButtons() {
-  if (prefersReducedMotion) return;
-  var btns = document.querySelectorAll('.btn-gold, .btn-outline');
-  btns.forEach(function (btn) {
-    btn.addEventListener('mousemove', function (e) {
-      var rect = btn.getBoundingClientRect();
-      var x = e.clientX - rect.left - rect.width / 2;
-      var y = e.clientY - rect.top  - rect.height / 2;
-      btn.style.transform = 'translateX(' + (x * 0.06) + 'px) translateY(' + (y * 0.08 - 2) + 'px)';
+  /* ── COUNTER ANIMATIONS ────────────────────────────── */
+  function initCounters() {
+    const els = document.querySelectorAll('[data-count]');
+    if (!els.length) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        const target = parseInt(el.dataset.count, 10);
+        const duration = 1800;
+        const step = target / (duration / 16);
+        let cur = 0;
+        const timer = setInterval(() => {
+          cur = Math.min(cur + step, target);
+          el.textContent = Math.floor(cur).toLocaleString();
+          if (cur >= target) clearInterval(timer);
+        }, 16);
+        io.unobserve(el);
+      });
+    }, { threshold: 0.5 });
+    els.forEach(el => io.observe(el));
+  }
+
+  /* ── RENDER SERMONS ────────────────────────────────── */
+  function renderSermons() {
+    const grid = document.getElementById('sermonsGrid');
+    if (!grid) return;
+    const sermons = getContent('sermons', 'rrmi_sermons')
+      .slice().sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
+    grid.classList.toggle('is-empty', !sermons.length);
+    if (!sermons.length) {
+      grid.innerHTML = emptyState('play', 'New sermons are on the way',
+        'Fresh messages will be posted here soon. Meanwhile, catch our latest services on YouTube.');
+      return;
+    }
+    grid.innerHTML = sermons.slice(0, 6).map(s => {
+      const d = new Date(s.date);
+      const dateStr = isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const thumb = s.thumbnail || (s.youtube ? `https://img.youtube.com/vi/${encodeURIComponent(s.youtube)}/hqdefault.jpg` : '');
+      return `<div class="sermon-card reveal-up">
+        <div class="sermon-thumb">
+          ${thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+          <div class="sermon-play">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+        <div class="sermon-body">
+          <div class="sermon-meta">
+            <span>${esc(s.category)}</span>
+            <span class="dot"></span>
+            <span>${dateStr}</span>
+          </div>
+          <h3 class="sermon-title">${esc(s.title)}</h3>
+          <div class="sermon-actions">
+            ${s.youtube ? `<a href="https://youtube.com/watch?v=${esc(s.youtube)}" target="_blank" rel="noopener" class="sermon-btn watch">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
+              Watch
+            </a>` : ''}
+            ${s.audio ? `<a href="${esc(s.audio)}" class="sermon-btn download" download>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              Audio
+            </a>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    initReveal();
+  }
+
+  /* ── RENDER EVENTS ─────────────────────────────────── */
+  function renderEvents() {
+    const grid = document.getElementById('eventsGrid');
+    if (!grid) return;
+    const events = getLS('rrmi_events', SEED.events);
+    const sorted = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    grid.innerHTML = sorted.slice(0, 4).map((ev, i) => {
+      const d = new Date(ev.date);
+      const day = d.getDate();
+      const mon = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+      const featured = ev.featured || i === 0;
+      return `<div class="event-card ${featured ? 'featured' : ''} reveal-up delay-${i % 2}">
+        <div class="event-date-col">
+          <span class="ev-day">${day}</span>
+          <span class="ev-mon">${mon}</span>
+        </div>
+        <div class="event-body">
+          <span class="event-tag">${esc(ev.category || 'Church')}</span>
+          <h3 class="event-title">${esc(ev.title)}</h3>
+          <p class="event-meta">
+            <strong>${ev.time || 'TBA'}</strong> · ${esc(ev.location || '')}
+          </p>
+          ${featured ? `<div class="event-countdown" id="cd_${ev.id}" data-date="${ev.date}"></div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    initCountdowns();
+    initReveal();
+  }
+
+  /* ── COUNTDOWN ─────────────────────────────────────── */
+  function initCountdowns() {
+    document.querySelectorAll('[data-date]').forEach(el => {
+      function tick() {
+        const target = new Date(el.dataset.date + 'T00:00:00');
+        const now = new Date();
+        let diff = target - now;
+        if (diff <= 0) { el.innerHTML = '<span class="cd-item"><span class="cd-num">🎉</span><span class="cd-label">Today!</span></span>'; return; }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.innerHTML = [['Days', d], ['Hrs', h], ['Min', m], ['Sec', s]].map(([l, v]) =>
+          `<div class="cd-item"><span class="cd-num">${v}</span><span class="cd-label">${l}</span></div>`
+        ).join('');
+      }
+      tick();
+      setInterval(tick, 1000);
     });
-    btn.addEventListener('mouseleave', function () {
-      btn.style.transform = '';
+  }
+
+  /* ── RENDER GIVE CARDS ─────────────────────────────── */
+  function renderGiveCards() {
+    const wrap = document.getElementById('giveCards');
+    if (!wrap) return;
+    const cats = getLS('rrmi_give_categories', SEED.giveCategories);
+    wrap.innerHTML = cats.map((c, i) => `
+      <div class="give-card ${i === 0 ? 'active' : ''}" onclick="this.closest('.give-cards').querySelectorAll('.give-card').forEach(x=>x.classList.remove('active'));this.classList.add('active')">
+        <span class="give-icon">${c.icon}</span>
+        <div class="give-card-title">${esc(c.title)}</div>
+        <div class="give-card-desc">${esc(c.desc)}</div>
+      </div>`).join('');
+  }
+
+  /* ── RENDER TESTIMONIALS ───────────────────────────── */
+  function renderTestimonials() {
+    const slider = document.getElementById('testiSlider');
+    const dotsWrap = document.getElementById('testiDots');
+    if (!slider) return;
+    const testimonials = getContent('testimonials', 'rrmi_testimonials');
+    if (!testimonials.length) {
+      slider.classList.add('is-empty');
+      slider.innerHTML = emptyState('quote', 'Testimonies coming soon',
+        'Has God done something wonderful in your life? We would love to hear it and, with your permission, share it here.',
+        '<a href="#contact" class="btn-primary sm-empty">Share Your Testimony</a>');
+      if (dotsWrap) dotsWrap.innerHTML = '';
+      return;
+    }
+    slider.classList.remove('is-empty');
+
+    slider.innerHTML = testimonials.map((t, i) => `
+      <div class="testi-slide ${i === 0 ? 'active' : ''}">
+        <div class="testi-card">
+          <div class="testi-stars">${'★'.repeat(t.rating || 5)}</div>
+          <p class="testi-text">"${esc(t.text)}"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">${esc(t.initials || t.name.slice(0,2).toUpperCase())}</div>
+            <div class="testi-info">
+              <strong>${esc(t.name)}</strong>
+              <span>${esc(t.location || '')}</span>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+
+    if (dotsWrap) dotsWrap.innerHTML = testimonials.map((_, i) =>
+      `<button class="testi-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></button>`
+    ).join('');
+
+    let cur = 0;
+    function goTo(n) {
+      const slides = slider.querySelectorAll('.testi-slide');
+      const dots = dotsWrap ? dotsWrap.querySelectorAll('.testi-dot') : [];
+      slides[cur] && slides[cur].classList.remove('active');
+      dots[cur] && dots[cur].classList.remove('active');
+      cur = (n + testimonials.length) % testimonials.length;
+      slides[cur] && slides[cur].classList.add('active');
+      dots[cur] && dots[cur].classList.add('active');
+    }
+    dotsWrap && dotsWrap.addEventListener('click', e => {
+      const btn = e.target.closest('[data-i]');
+      if (btn) goTo(parseInt(btn.dataset.i));
     });
-  });
-}
-
-/* ── RIPPLE ──────────────────────────────────────────────────── */
-document.querySelectorAll('.btn-gold').forEach(function (btn) {
-  btn.addEventListener('click', function (e) {
-    if (prefersReducedMotion) return;
-    var rect = btn.getBoundingClientRect();
-    var ripple = document.createElement('span');
-    var size = Math.max(rect.width, rect.height);
-    ripple.style.cssText = 'position:absolute;border-radius:50%;width:' + size + 'px;height:' + size + 'px;left:' + (e.clientX - rect.left - size/2) + 'px;top:' + (e.clientY - rect.top - size/2) + 'px;background:rgba(255,255,255,.28);transform:scale(0);animation:ripple .65s ease-out;pointer-events:none';
-    btn.style.position = 'relative';
-    btn.style.overflow = 'hidden';
-    btn.appendChild(ripple);
-    setTimeout(function () { ripple.remove(); }, 700);
-  });
-});
-var rippleStyle = document.createElement('style');
-rippleStyle.textContent = '@keyframes ripple{to{transform:scale(4);opacity:0}}';
-document.head.appendChild(rippleStyle);
-
-/* ── SMOOTH SCROLL ───────────────────────────────────────────── */
-document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-  a.addEventListener('click', function (e) {
-    var target = document.querySelector(a.getAttribute('href'));
-    if (!target) return;
-    e.preventDefault();
-    var navH = 76;
-    var top = target.getBoundingClientRect().top + window.scrollY - navH;
-    window.scrollTo({ top: top, behavior: 'smooth' });
-  });
-});
-
-/* ── FOOTER YEAR ─────────────────────────────────────────────── */
-function setFooterYear() {
-  var el = document.getElementById('yr');
-  if (el) el.textContent = new Date().getFullYear();
-}
-
-/* ════════════════════════════════════════════════════════════════
-   CMS CONTENT LOADER
-   Reads from localStorage (admin.html) — falls back to static HTML
-   ════════════════════════════════════════════════════════════════ */
-var CMS_KEYS = {
-  sermons:'rrmi_sermons', gallery:'rrmi_gallery',
-  testimonials:'rrmi_testimonials', events:'rrmi_events', give:'rrmi_give'
-};
-
-function cmsGet(key) {
-  try { var d = localStorage.getItem(CMS_KEYS[key]); return d ? JSON.parse(d) : null; }
-  catch(e) { return null; }
-}
-
-function initCMSContent() {
-  renderCMSSermons();
-  renderCMSGallery();
-  renderCMSTestimonials();
-  renderCMSEvents();
-  renderCMSGive();
-}
-
-function escHtml(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function fmtDateDisplay(s) {
-  if (!s) return '';
-  try { var d = new Date(s+'T00:00:00'); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
-  catch(e) { return s; }
-}
-
-function isUpcoming(s) { return new Date(s+'T23:59:59') >= new Date(); }
-
-function categoryBadge(cat) {
-  var m = {'Special Event':'tag-gold','Youth':'tag-blue','Training':'tag-green','Outreach':'tag-dim'};
-  return m[cat] || 'tag-gold';
-}
-
-/* Sermons */
-function renderCMSSermons() {
-  var data = cmsGet('sermons');
-  if (!data || !data.length) return;
-  var grid = document.getElementById('sermonGrid');
-  if (!grid) return;
-  grid.innerHTML = data.slice(0,6).map(function(s,i) {
-    var thumb = escHtml(s.thumb || 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=500&q=70');
-    var delay = i===1?' d1':i===2?' d2':'';
-    return '<div class="sermon-card reveal' + delay + '">'
-      + '<div class="sermon-thumb" style="background-image:url(\'' + thumb + '\')">'
-      + '<div class="sermon-thumb-overlay"><button class="play-btn"' + (s.ytUrl?(' onclick="window.open(\'' + escHtml(s.ytUrl) + '\',\'_blank\')"'):'') + ' aria-label="Play"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>'
-      + '<span class="sermon-cat">' + escHtml(s.category||'Message') + '</span>'
-      + '</div><div class="sermon-body">'
-      + '<h3>' + escHtml(s.title) + '</h3>'
-      + '<p class="sermon-meta"><span>' + escHtml(s.preacher||'Pastor Itoro Isaac James') + '</span><span>' + escHtml(s.date||'') + '</span><span>' + escHtml(s.duration||'') + '</span></p>'
-      + '<div class="sermon-actions"><button class="btn-play-sm"' + (s.ytUrl?(' onclick="window.open(\'' + escHtml(s.ytUrl) + '\',\'_blank\')"'):'') + '><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Play</button>'
-      + '<button class="btn-dl" title="Download"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>'
-      + '</div></div></div>';
-  }).join('');
-  initScrollReveal();
-}
-
-/* Gallery */
-function renderCMSGallery() {
-  var data = cmsGet('gallery');
-  if (!data || !data.length) return;
-  var grid = document.getElementById('galleryGrid');
-  if (!grid) return;
-  var cls = ['tall','','','wide','',''];
-  grid.innerHTML = data.slice(0,6).map(function(g,i) {
-    return '<div class="gallery-item ' + (cls[i]||'') + ' reveal-scale' + (i?' d'+(i%3+1):'') + '" data-cat="' + escHtml(g.category||'all') + '" style="background-image:url(\'' + escHtml(g.img) + '\')">'
-      + '<div class="gallery-overlay"><span>' + escHtml(g.caption||g.category||'') + '</span></div></div>';
-  }).join('');
-  initGallery();
-  initScrollReveal();
-}
-
-/* Testimonials */
-function renderCMSTestimonials() {
-  var data = cmsGet('testimonials');
-  if (!data || !data.length) return;
-  var track = document.getElementById('testTrack');
-  if (!track) return;
-  track.innerHTML = data.map(function(t) {
-    return '<div class="testimonial-slide">'
-      + '<div class="test-stars">' + '\u2605'.repeat(parseInt(t.stars)||5) + '</div>'
-      + '<blockquote>&ldquo;' + escHtml(t.text) + '&rdquo;</blockquote>'
-      + '<div class="test-author"><div class="test-avatar">' + escHtml((t.name||'?')[0].toUpperCase()) + '</div>'
-      + '<div><strong>' + escHtml(t.name) + '</strong><span>' + escHtml(t.role||'Church Member') + (t.tag?' · '+escHtml(t.tag):'') + '</span></div></div>'
-      + '</div>';
-  }).join('');
-  initTestimonials();
-}
-
-/* Events */
-function renderCMSEvents() {
-  var grid = document.getElementById('eventsGrid');
-  if (!grid) return;
-  var data = cmsGet('events') || [];
-  var sorted = data.slice().sort(function(a,b) { return new Date(a.date)-new Date(b.date); });
-  var upcoming = sorted.filter(function(e) { return isUpcoming(e.date); }).slice(0,3);
-  if (!upcoming.length) {
-    grid.style.gridTemplateColumns = '1fr';
-    grid.innerHTML = '<div class="events-empty"><div class="events-empty-icon">📅</div>'
-      + '<h3>No Upcoming Events Right Now</h3>'
-      + '<p>Check back soon, or follow us on social media for the latest updates.</p></div>';
-    return;
+    const auto = setInterval(() => goTo(cur + 1), 5500);
+    slider.addEventListener('mouseenter', () => clearInterval(auto));
   }
-  grid.style.gridTemplateColumns = upcoming.length>=3?'1.4fr 1fr 1fr':upcoming.length===2?'1fr 1fr':'1fr';
-  grid.innerHTML = upcoming.map(function(ev,i) {
-    var d = new Date(ev.date+'T00:00:00');
-    var mon = d.toLocaleString('en-GB',{month:'short'}).toUpperCase();
-    var day = d.getDate();
-    var yr  = d.getFullYear();
-    var fT  = function(t) { if(!t) return ''; var p=t.split(':'),hr=parseInt(p[0]); return (hr>12?hr-12:hr||12)+':'+p[1]+' '+(hr>=12?'PM':'AM'); };
-    var cd  = i===0&&ev.featured ? '<div class="event-countdown" data-date="'+ev.date+'">'
-      + '<div class="cd-box"><span class="cd-num" id="cd1-d">--</span><span class="cd-label">Days</span></div>'
-      + '<div class="cd-box"><span class="cd-num" id="cd1-h">--</span><span class="cd-label">Hrs</span></div>'
-      + '<div class="cd-box"><span class="cd-num" id="cd1-m">--</span><span class="cd-label">Min</span></div>'
-      + '</div>' : '';
-    return '<div class="event-card' + (ev.featured?' featured':'') + ' reveal' + (i?' d'+i:'') + '">'
-      + '<div class="event-date-block"><span class="ev-month">' + mon + '</span><span class="ev-day">' + day + '</span><span class="ev-year">' + yr + '</span></div>'
-      + '<div class="event-info">'
-      + (ev.featured?'<span class="tag tag-gold">\u2b50 Featured</span>':'<span class="tag '+categoryBadge(ev.category)+'">' + escHtml(ev.category||'Event') + '</span>')
-      + '<h3>' + escHtml(ev.title) + '</h3>'
-      + '<p>' + escHtml(ev.description||'') + '</p>'
-      + '<div class="event-meta">' + (ev.time?'<span>\uD83D\uDD50 '+fT(ev.time)+'</span>':'') + (ev.location?'<span>\uD83D\uDCCD '+escHtml(ev.location)+'</span>':'') + '</div>'
-      + '</div>' + cd + '</div>';
-  }).join('');
-  initCountdown();
-  initScrollReveal();
-}
 
-/* Give */
-function renderCMSGive() {
-  var data = cmsGet('give');
-  if (!data || !data.length) return;
-  var grid = document.getElementById('giveGrid');
-  if (!grid) return;
-  grid.innerHTML = data.map(function(g,i) {
-    return '<div class="give-card' + (i===2?' highlight':'') + ' reveal' + (i?' d'+i:'') + '">'
-      + '<div class="give-icon">' + (g.icon||'💝') + '</div>'
-      + '<h3>' + escHtml(g.title) + '</h3>'
-      + '<p>' + escHtml(g.description) + '</p>'
-      + '<button type="button" class="' + (i===2?'btn-gold':'btn-outline') + ' mt-auto js-give-trigger" data-give="' + escHtml(g.title) + '">' + (i===2?'Become a Partner':'Give '+escHtml(g.title)) + '</button>'
-      + '</div>';
-  }).join('');
-  initScrollReveal();
-}
+  /* ── GALLERY FILTER + LIGHTBOX ─────────────────────── */
+  function initGallery() {
+    const grid = document.getElementById('galleryGrid');
+    if (!grid) return;
+    const items = getContent('gallery', 'rrmi_gallery');
+    const filters = document.querySelector('.gallery-filters');
+    if (!items.length) {
+      if (filters) filters.hidden = true;
+      grid.classList.add('is-empty');
+      grid.innerHTML = emptyState('camera', 'Photos coming soon',
+        'Pictures from our services, events and outreach will appear here shortly.');
+      return;
+    }
+    if (filters) filters.hidden = false;
+    grid.classList.remove('is-empty');
 
-/* Flash popup */
-(function() {
-  if (sessionStorage.getItem('rrmi_flash_shown')) return;
-  var data = null;
-  try { data = JSON.parse(localStorage.getItem('rrmi_flash_event')); } catch(e) {}
-  if (!data || !data.enabled) return;
-  if (data.eventId) {
-    var linkedEvents = cmsGet('events') || [];
-    var linkedEvent = null;
-    for (var li = 0; li < linkedEvents.length; li++) { if (linkedEvents[li].id === data.eventId) { linkedEvent = linkedEvents[li]; break; } }
-    if (!linkedEvent || !isUpcoming(linkedEvent.date)) return; /* linked event has passed or was deleted — don't show a stale popup */
+    function render(filter = 'all') {
+      const f = String(filter || 'all').toLowerCase();
+      const filtered = f === 'all' ? items : items.filter(i => String(i.category || '').toLowerCase() === f);
+      if (!filtered.length) {
+        grid.innerHTML = `<p class="empty-inline">No photos in this category yet.</p>`;
+        return;
+      }
+      grid.innerHTML = filtered.map((item, idx) => `
+        <div class="gallery-item" data-idx="${idx}" data-category="${esc(item.category)}">
+          ${item.src
+            ? `<img src="${esc(item.src)}" alt="${esc(item.title)}" loading="lazy">`
+            : `<div class="gallery-placeholder">✝</div>`
+          }
+          <div class="gi-overlay">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          </div>
+        </div>`).join('');
+      grid.querySelectorAll('.gallery-item').forEach(el => {
+        el.addEventListener('click', () => openLightbox(filtered, parseInt(el.dataset.idx)));
+      });
+    }
+    render();
+
+    document.querySelectorAll('.gf-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.gf-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        render(btn.dataset.filter);
+      });
+    });
+
+    // Lightbox
+    let lbIdx = 0;
+    let lbItems = items;
+    const lb = document.getElementById('lightbox');
+    if (!lb) return;
+    const lbImg = lb.querySelector('.lb-img-wrap');
+    const lbCap = lb.querySelector('.lb-caption');
+
+    function openLightbox(list, idx) {
+      lbItems = list; lbIdx = idx;
+      showLbItem();
+      lb.style.display = 'flex';
+    }
+    function showLbItem() {
+      const item = lbItems[lbIdx];
+      if (!item) return;
+      lbImg.innerHTML = item.src
+        ? `<img src="${esc(item.src)}" alt="${esc(item.title)}">`
+        : `<div style="width:400px;height:400px;display:flex;align-items:center;justify-content:center;background:#18174D;border-radius:12px;color:#E3A63B;font-size:6rem">✝</div>`;
+      if (lbCap) lbCap.textContent = item.title || '';
+    }
+    lb.querySelector('.lb-close').addEventListener('click', () => lb.style.display = 'none');
+    lb.querySelector('.lb-prev').addEventListener('click', () => { lbIdx = (lbIdx - 1 + lbItems.length) % lbItems.length; showLbItem(); });
+    lb.querySelector('.lb-next').addEventListener('click', () => { lbIdx = (lbIdx + 1) % lbItems.length; showLbItem(); });
+    lb.addEventListener('click', e => { if (e.target === lb) lb.style.display = 'none'; });
+    document.addEventListener('keydown', e => {
+      if (lb.style.display === 'none') return;
+      if (e.key === 'ArrowLeft') { lbIdx = (lbIdx - 1 + lbItems.length) % lbItems.length; showLbItem(); }
+      if (e.key === 'ArrowRight') { lbIdx = (lbIdx + 1) % lbItems.length; showLbItem(); }
+      if (e.key === 'Escape') lb.style.display = 'none';
+    });
   }
-  var overlay = document.getElementById('flashOverlay');
-  var banner  = document.getElementById('flashBanner');
-  var badge   = document.getElementById('flashDateBadge');
-  var titleEl = document.getElementById('flashTitle');
-  var metaEl  = document.getElementById('flashMeta');
-  var descEl  = document.getElementById('flashDesc');
-  var viewBtn = document.getElementById('flashViewEvent');
-  var allBtn  = document.getElementById('flashAllEvents');
-  var closeX  = document.getElementById('flashClose');
-  var closeBtn= document.getElementById('flashCloseBtn');
-  if (!overlay) return;
-  if (banner && data.img) { banner.src = data.img; }
-  if (badge)   badge.textContent   = data.date || '';
-  if (titleEl) titleEl.textContent = data.title || '';
-  if (metaEl)  metaEl.textContent  = data.date  || '';
-  if (descEl)  descEl.textContent  = data.description || '';
-  if (viewBtn) viewBtn.textContent = data.btnViewEvent || 'View Event Details';
-  if (allBtn)  allBtn.textContent  = data.btnAllEvents || 'View All Events';
-  function closeFlash() {
-    overlay.style.animation = 'fadeIn .3s reverse forwards';
-    setTimeout(function() { overlay.style.display='none'; }, 320);
-    sessionStorage.setItem('rrmi_flash_shown','1');
+
+  /* ── FORMS ─────────────────────────────────────────── */
+  function initForms() {
+    document.querySelectorAll('form[data-form]').forEach(form => {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const type = form.dataset.form;
+        const data = Object.fromEntries(new FormData(form));
+        const key = `rrmi_${type}_submissions`;
+        const arr = getLS(key, []);
+        arr.push({ ...data, ts: new Date().toISOString() });
+        localStorage.setItem(key, JSON.stringify(arr));
+        form.reset();
+        const success = form.querySelector('.form-success');
+        if (success) {
+          success.style.display = 'block';
+          setTimeout(() => success.style.display = 'none', 4000);
+        }
+      });
+    });
+
+    // Newsletter form
+    const nlForm = document.getElementById('newsletterForm');
+    if (nlForm) {
+      nlForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const email = nlForm.querySelector('input[type="email"]').value;
+        const arr = getLS('rrmi_newsletter', []);
+        if (!arr.includes(email)) {
+          arr.push(email);
+          localStorage.setItem('rrmi_newsletter', JSON.stringify(arr));
+        }
+        nlForm.querySelector('input').value = '';
+        const btn = nlForm.querySelector('button');
+        const orig = btn.textContent;
+        btn.textContent = '✓ Subscribed!';
+        setTimeout(() => btn.textContent = orig, 3000);
+      });
+    }
   }
-  closeX   && closeX.addEventListener('click', closeFlash);
-  closeBtn && closeBtn.addEventListener('click', closeFlash);
-  viewBtn  && viewBtn.addEventListener('click', function() { closeFlash(); setTimeout(function() { var el=document.getElementById('events'); if(el) el.scrollIntoView({behavior:'smooth'}); },350); });
-  allBtn   && allBtn.addEventListener('click',  function() { closeFlash(); setTimeout(function() { var el=document.getElementById('events'); if(el) el.scrollIntoView({behavior:'smooth'}); },350); });
-  overlay.addEventListener('click', function(e) { if(e.target===overlay) closeFlash(); });
-  document.addEventListener('keydown', function(e) { if(e.key==='Escape' && overlay.style.display!=='none') closeFlash(); });
-  overlay.style.display = 'flex';
+
+  /* ── LIVE STREAM STATUS ────────────────────────────── */
+  function initLiveStream() {
+    const cfg = getLS('rrmi_live_cfg', null);
+    if (cfg && cfg.youtube_live) {
+      const iframe = document.getElementById('youtubePlayer');
+      if (iframe) iframe.src = `https://www.youtube.com/embed/${cfg.youtube_live}?autoplay=0&rel=0`;
+    }
+  }
+
+  /* ── SCROLL CUE ────────────────────────────────────── */
+  function initScrollCue() {
+    const cue = document.querySelector('.hero-scroll-cue');
+    if (cue) cue.addEventListener('click', () => {
+      document.getElementById('about') && document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  /* ── GIVE SECTION ──────────────────────────────────── */
+  function initGive() {
+    renderGiveCards();
+    const giveBtn = document.getElementById('giveNowBtn');
+    if (giveBtn) {
+      giveBtn.addEventListener('click', () => {
+        const active = document.querySelector('.give-card.active .give-card-title');
+        const cat = active ? active.textContent : 'Offering';
+        alert(`Thank you for your desire to give ${cat}!\n\nPlease use the bank details below or contact us directly.\n\nAcct Name: Redemption Revival Ministries Int'l\nBank: First Bank\nAcct No: 3100584737\n\nGod bless you!`);
+      });
+    }
+  }
+
+  /* ── SMOOTH SCROLL for anchor links ────────────────── */
+  function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if (el) {
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  }
+
+  /* ── HELPER ─────────────────────────────────────────── */
+  function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── INIT ───────────────────────────────────────────── */
+  function init() {
+    seedData();
+    clearOldDemoContent();
+    initFlash();
+    initNavbar();
+    initHeroSlider();
+    initCanvas();
+    initScrollCue();
+    renderSermons();
+    renderEvents();
+    renderTestimonials();
+    initGallery();
+    initGive();
+    initForms();
+    initLiveStream();
+    initReveal();
+    initCounters();
+    initSmoothScroll();
+  }
+
+  // index.html buttons also carry inline onclick="filterGallery()/closeLightbox()/lbNav()";
+  // the real handlers are attached above, these stubs just stop console errors.
+  window.filterGallery = window.filterGallery || function () {};
+  window.closeLightbox = window.closeLightbox || function () {};
+  window.lbNav = window.lbNav || function () {};
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
 })();
-
-/* Storage event for cross-tab updates */
-window.addEventListener('storage', function(e) {
-  var keys = Object.values(CMS_KEYS);
-  if (keys.indexOf(e.key) >= 0) initCMSContent();
-});

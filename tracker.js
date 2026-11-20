@@ -1,219 +1,129 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   RRMI · tracker.js  — Visitor Analytics Engine  (v1.0)
-   Runs silently on every page. Zero impact on perceived performance.
-   Storage: localStorage  |  Session guard: sessionStorage
-   ═══════════════════════════════════════════════════════════════════════════ */
-'use strict';
-(function RRMI_Tracker() {
+/* ═══════════════════════════════════════════════════════
+   RRMI v6 — Visitor Analytics Tracker
+   ═══════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
 
-  /* ── CONFIG ────────────────────────────────────────────────────────────── */
-  var STORE_KEY    = 'rrmi_visits';       // array of visit records
-  var MONTH_KEY    = 'rrmi_month';        // current month marker  "YYYY-MM"
-  var SESSION_KEY  = 'rrmi_session';      // unique session id
-  var IPDATA_KEY   = 'rrmi_ipdata';       // cached IP / geo (sessionStorage)
-  var MAX_RECORDS  = 10000;               // cap log to prevent runaway storage
-  var DEDUP_SECS   = 30;                  // ignore same-page reload within N sec
+  const KEY = 'rrmi_analytics';
+  const START_KEY = 'rrmi_session_start';
+  const now = Date.now();
+  const today = new Date().toISOString().slice(0, 7); // YYYY-MM
 
-  /* ── PAGE MAP ──────────────────────────────────────────────────────────── */
-  // Maps URL hashes / titles to readable page names.
-  // Falls back to the document title or hash automatically — future-proof.
-  function detectPage() {
-    var h = (window.location.hash || '').replace('#','').trim();
-    var map = {
-      '':'Home','home':'Home',
-      'about':'About Us','welcome':'About Us',
-      'ministries':'Ministries',
-      'sermons':'Sermons',
-      'events':'Events',
-      'livestream':'Live Stream',
-      'gallery':'Gallery',
-      'prayer':'Prayer Request',
-      'give':'Give / Donation',
-      'testimonials':'Testimonials',
-      'contact':'Contact',
-      'footer':'Contact'
-    };
-    if (map[h]) return map[h];
-    // Dynamic fallback — capture title or first path segment
-    var title = document.title.replace(' · RRMI','').replace('Redemption Revival Ministry International','Home').trim();
-    return title || 'Page: '+(h||'Home');
+  function getDB() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || { month: today, visitors: [], total: 0, countries: {} }; }
+    catch { return { month: today, visitors: [], total: 0, countries: {} }; }
+  }
+  function saveDB(db) {
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch {}
   }
 
-  /* ── DEVICE DETECTION ──────────────────────────────────────────────────── */
-  function parseUA() {
-    var ua = navigator.userAgent;
-    // Device
-    var device = 'Desktop';
-    if (/Tablet|iPad/i.test(ua)) device = 'Tablet';
-    else if (/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) device = 'Mobile';
-    // Browser
-    var browser = 'Unknown';
-    if      (/Edg\//i.test(ua))                      browser = 'Edge';
-    else if (/OPR\/|Opera/i.test(ua))                browser = 'Opera';
-    else if (/SamsungBrowser/i.test(ua))             browser = 'Samsung Internet';
-    else if (/Chrome\/\d/i.test(ua) && !/Chromium/i.test(ua)) browser = 'Chrome';
-    else if (/Firefox\/\d/i.test(ua))                browser = 'Firefox';
-    else if (/Safari\/\d/i.test(ua) && !/Chrome/i.test(ua))   browser = 'Safari';
-    else if (/MSIE|Trident/i.test(ua))               browser = 'Internet Explorer';
-    // OS
-    var os = 'Unknown';
-    if      (/Windows NT 10/i.test(ua))  os = 'Windows 10/11';
-    else if (/Windows NT/i.test(ua))     os = 'Windows';
-    else if (/Mac OS X/i.test(ua))       os = 'macOS';
-    else if (/iPhone/i.test(ua))         os = 'iOS';
-    else if (/iPad/i.test(ua))           os = 'iPadOS';
-    else if (/Android/i.test(ua))        os = 'Android';
-    else if (/Linux/i.test(ua))          os = 'Linux';
-    return { device: device, browser: browser, os: os };
-  }
-
-  /* ── SESSION ID ────────────────────────────────────────────────────────── */
-  function getSession() {
-    var s = sessionStorage.getItem(SESSION_KEY);
-    if (!s) { s = 'sess-'+Date.now()+'-'+Math.random().toString(36).slice(2,8); sessionStorage.setItem(SESSION_KEY, s); }
-    return s;
-  }
-
-  /* ── STORAGE HELPERS ───────────────────────────────────────────────────── */
-  function loadVisits() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch(e) { return []; }
-  }
-  function saveVisits(arr) {
-    // trim to cap
-    if (arr.length > MAX_RECORDS) arr = arr.slice(arr.length - MAX_RECORDS);
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); } catch(e) {}
-  }
-
-  /* ── MONTHLY AUTO-RESET ────────────────────────────────────────────────── */
-  function checkMonthReset() {
-    var now   = new Date();
-    var month = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');
-    var stored = localStorage.getItem(MONTH_KEY);
-    if (stored && stored !== month) {
-      // New month — archive last month's data then clear active
-      try {
-        var old = loadVisits();
-        if (old.length) {
-          localStorage.setItem('rrmi_visits_archive_'+stored, JSON.stringify(old.slice(-500)));
-        }
-      } catch(e){}
-      saveVisits([]);
+  // Monthly reset
+  function resetIfNewMonth(db) {
+    if (db.month !== today) {
+      db.month = today;
+      db.visitors = [];
+      db.total = 0;
+      db.countries = {};
     }
-    localStorage.setItem(MONTH_KEY, month);
+    return db;
   }
 
-  /* ── DUPLICATE GUARD ───────────────────────────────────────────────────── */
-  function isDuplicate(session, page) {
-    var key = 'rrmi_last_'+session+'_'+page.replace(/\W/g,'_');
-    var last = parseInt(sessionStorage.getItem(key)||'0');
-    var now  = Date.now();
-    if ((now - last) < DEDUP_SECS * 1000) return true;
-    sessionStorage.setItem(key, now);
-    return false;
+  // Deduplicate by session
+  function getSessionId() {
+    let id = sessionStorage.getItem('rrmi_sid');
+    if (!id) {
+      id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('rrmi_sid', id);
+    }
+    return id;
   }
 
-  /* ── SESSION DURATION ──────────────────────────────────────────────────── */
-  var _pageStart = Date.now();
-  var _visitId   = null;
+  // Device detection
+  function getDevice() {
+    const ua = navigator.userAgent;
+    if (/Mobile|Android|iPhone|iPad/i.test(ua)) return /iPad/i.test(ua) ? 'Tablet' : 'Mobile';
+    return 'Desktop';
+  }
+  function getOS() {
+    const ua = navigator.userAgent;
+    if (/Windows/i.test(ua)) return 'Windows';
+    if (/Mac OS X/i.test(ua)) return 'macOS';
+    if (/Android/i.test(ua)) return 'Android';
+    if (/iPhone|iPad/i.test(ua)) return 'iOS';
+    if (/Linux/i.test(ua)) return 'Linux';
+    return 'Unknown';
+  }
+  function getBrowser() {
+    const ua = navigator.userAgent;
+    if (/Edg\//i.test(ua)) return 'Edge';
+    if (/OPR\//i.test(ua)) return 'Opera';
+    if (/Chrome/i.test(ua)) return 'Chrome';
+    if (/Firefox/i.test(ua)) return 'Firefox';
+    if (/Safari/i.test(ua)) return 'Safari';
+    return 'Other';
+  }
 
-  function updateDuration() {
-    if (!_visitId) return;
+  // Fetch IP/geo
+  function fetchGeo(cb) {
     try {
-      var visits = loadVisits();
-      var idx = visits.findIndex(function(v){ return v.id === _visitId; });
-      if (idx >= 0) {
-        visits[idx].duration = Math.round((Date.now() - _pageStart) / 1000);
-        saveVisits(visits);
-      }
-    } catch(e){}
+      fetch('https://freeipapi.com/api/json/', { method: 'GET', mode: 'cors' })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => cb(d && d.countryName ? { country: d.countryName, city: d.cityName || '', ip: d.ipAddress || '' } : null))
+        .catch(() => cb(null));
+    } catch { cb(null); }
   }
 
-  // Update duration every 15 seconds + on page unload
-  setInterval(updateDuration, 15000);
-  window.addEventListener('beforeunload', updateDuration);
-  document.addEventListener('visibilitychange', function(){ if(document.hidden) updateDuration(); });
+  function record(geo) {
+    let db = getDB();
+    db = resetIfNewMonth(db);
+    const sid = getSessionId();
 
-  /* ── GEOLOCATION (async, non-blocking) ────────────────────────────────── */
-  function getGeo(cb) {
-    // Try sessionStorage cache first to avoid repeat API calls
-    try {
-      var cached = sessionStorage.getItem(IPDATA_KEY);
-      if (cached) { cb(JSON.parse(cached)); return; }
-    } catch(e){}
+    // Check if this session already recorded
+    if (db.visitors.some(v => v.sid === sid)) return;
 
-    // Free geo API — no key needed, 1000/day free
-    fetch('https://freeipapi.com/api/json', { signal: AbortSignal.timeout ? AbortSignal.timeout(4000) : undefined })
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        var geo = {
-          ip:      d.ipAddress    || 'Unknown',
-          country: d.countryName  || 'Unknown',
-          region:  d.regionName   || 'Unknown',
-          city:    d.cityName     || ''
-        };
-        try { sessionStorage.setItem(IPDATA_KEY, JSON.stringify(geo)); } catch(e){}
-        cb(geo);
-      })
-      .catch(function(){
-        var fallback = { ip:'Unavailable', country:'Unknown', region:'Unknown', city:'' };
-        try { sessionStorage.setItem(IPDATA_KEY, JSON.stringify(fallback)); } catch(e){}
-        cb(fallback);
-      });
-  }
+    db.total = (db.total || 0) + 1;
 
-  /* ── RECORD A VISIT ────────────────────────────────────────────────────── */
-  function recordVisit(geo) {
-    var session = getSession();
-    var page    = detectPage();
-
-    if (isDuplicate(session, page)) return;
-
-    var ua   = parseUA();
-    var now  = new Date();
-    var visit = {
-      id:       'v-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),
-      ts:       now.getTime(),
-      date:     now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
-      time:     now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
-      ip:       geo.ip,
-      country:  geo.country,
-      region:   geo.region,
-      city:     geo.city,
-      device:   ua.device,
-      browser:  ua.browser,
-      os:       ua.os,
-      page:     page,
-      duration: 0,
-      session:  session,
-      returning: !!localStorage.getItem('rrmi_returning_'+session.slice(0,8))
+    const entry = {
+      sid,
+      ts: new Date().toISOString(),
+      device: getDevice(),
+      os: getOS(),
+      browser: getBrowser(),
+      page: location.pathname,
+      referrer: document.referrer || 'direct',
+      country: geo ? geo.country : 'Unknown',
+      city: geo ? geo.city : '',
     };
-    _visitId = visit.id;
 
-    // Mark as returning on future sessions
-    try { localStorage.setItem('rrmi_returning_'+session.slice(0,8), '1'); } catch(e){}
+    db.visitors.push(entry);
 
-    var visits = loadVisits();
-    visits.push(visit);
-    saveVisits(visits);
+    // Countries count
+    if (!db.countries) db.countries = {};
+    db.countries[entry.country] = (db.countries[entry.country] || 0) + 1;
+
+    // Keep last 500 only
+    if (db.visitors.length > 500) db.visitors = db.visitors.slice(-500);
+
+    saveDB(db);
+
+    // Session start time for duration
+    sessionStorage.setItem(START_KEY, String(now));
   }
 
-  /* ── TRACK HASH CHANGES (SPA-style single-page navigation) ────────────── */
-  window.addEventListener('hashchange', function() {
-    _pageStart = Date.now();
-    getGeo(recordVisit);
+  // Track session duration on unload
+  window.addEventListener('beforeunload', () => {
+    const start = parseInt(sessionStorage.getItem(START_KEY), 10);
+    if (!start) return;
+    const duration = Math.round((Date.now() - start) / 1000);
+    const sid = getSessionId();
+    const db = getDB();
+    const visitor = db.visitors.find(v => v.sid === sid);
+    if (visitor) {
+      visitor.duration = duration;
+      saveDB(db);
+    }
   });
 
-  /* ── BOOT (deferred so it never blocks render) ─────────────────────────── */
-  function boot() {
-    checkMonthReset();
-    getGeo(recordVisit);
-  }
-
-  // Use requestIdleCallback if available, else 500ms timeout
-  if (window.requestIdleCallback) {
-    window.requestIdleCallback(boot, { timeout: 2000 });
-  } else {
-    setTimeout(boot, 500);
-  }
+  fetchGeo(record);
 
 })();
