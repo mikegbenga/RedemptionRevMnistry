@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   RRMI — WEBSITE CONTENT (Sermons · Gallery · Testimonies)
+   RRMI — WEBSITE CONTENT (sermons, gallery, testimonies, events, giving)
    ───────────────────────────────────────────────────────────────
    This is the ONE file to edit when you have new content.
    Everything listed here is shown to every visitor.
@@ -57,6 +57,41 @@ window.RRMI_CONTENT = {
   ─────────────────────────────────────────────────────────── */
   testimonials: [
 
-  ]
+  ],
+
+  /* ── UPCOMING EVENTS ────────────────────────────────────────
+     Past events disappear from the website automatically.
+     featured: true shows a countdown on that event.
+     Example:
+       { title: "Annual Convention 2027", date: "2027-03-15", time: "9:00 AM",
+         location: "RRMI Auditorium", category: "Convention", featured: true },
+  ─────────────────────────────────────────────────────────── */
+  events: [
+
+  ],
+
+  /* ── POP-UP ANNOUNCEMENT ────────────────────────────────────
+     Shown once per visit when show is true (e.g. a flyer).
+     image = a file in assets/images/   link = where the button goes
+  ─────────────────────────────────────────────────────────── */
+  announcement: {
+    show: false,
+    title: "",
+    message: "",
+    image: "",
+    cta: "Learn more",
+    link: ""
+  },
+
+  /* ── GIVING ─────────────────────────────────────────────────
+     Fill these in to show the church account on the Give section
+     (with a "Copy account number" button). Leave "" to show
+     "Call or WhatsApp 08030949380 for our account details".
+  ─────────────────────────────────────────────────────────── */
+  giving: {
+    bankName: "",
+    accountName: "",
+    accountNumber: ""
+  }
 
 };

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   RRMI v7 — Main Script
+   RRMI v8 — Main Script
    ═══════════════════════════════════════════════════════ */
 
 (function () {
@@ -8,12 +8,7 @@
   /* ── SEED DATA ─────────────────────────────────────── */
   const SEED = {
     sermons: [],   // published sermons live in content.js
-    events: [
-      { id: 1, title: "Pastor's Birthday Celebration & Thanksgiving Service", date: "2025-02-14", time: "10:00 AM", location: "RRMI Main Auditorium", category: "Special", featured: true, description: "Join us as we celebrate the life and ministry of our beloved Senior Pastor, Apostle Itoro Isaac James." },
-      { id: 2, title: "Annual Convention — Open Heavens 2025", date: "2025-03-15", time: "9:00 AM", location: "RRMI Grounds, Uyo", category: "Convention", featured: false, description: "A powerful 3-day annual convention with ministers from across the globe." },
-      { id: 3, title: "Youth Revival — Generation on Fire", date: "2025-02-28", time: "5:00 PM", location: "RRMI Auditorium", category: "Youth", featured: false, description: "A special revival meeting for young people aged 15–35." },
-      { id: 4, title: "Women of Destiny Conference", date: "2025-03-08", time: "8:00 AM", location: "RRMI Hall", category: "Conference", featured: false, description: "Empowering women to walk in purpose and destiny." }
-    ],
+    events: [],        // published events live in content.js
     gallery: [],       // published photos live in content.js
     testimonials: [],  // published testimonies live in content.js
     giveCategories: [
@@ -45,11 +40,11 @@
   // sees them. Items added in the admin panel (saved in that browser only)
   // are appended so the admin can preview them before publishing.
   const PUBLISHED = window.RRMI_CONTENT || {};
-  const CONTENT_VERSION = '2026-11-20-cleared';
+  const CONTENT_VERSION = '2026-11-20-v8';
   function clearOldDemoContent() {
     try {
       if (localStorage.getItem('rrmi_content_version') !== CONTENT_VERSION) {
-        ['rrmi_sermons', 'rrmi_gallery', 'rrmi_testimonials']
+        ['rrmi_sermons', 'rrmi_gallery', 'rrmi_testimonials', 'rrmi_events']
           .forEach(k => localStorage.setItem(k, '[]'));
         localStorage.setItem('rrmi_content_version', CONTENT_VERSION);
       }
@@ -62,6 +57,7 @@
   }
   const ICONS = {
     play: '<path d="m10 8 6 4-6 4V8z"/><circle cx="12" cy="12" r="10"/>',
+    calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
     camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
     quote: '<path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/>'
   };
@@ -80,9 +76,22 @@
     const overlay = document.getElementById('flashOverlay');
     if (!overlay) return;
 
-    // Check admin config
-    const cfg = getLS('rrmi_flash_cfg', null);
-    if (cfg && cfg.enabled === false) return;
+    // Published announcement (content.js); an admin-panel config in this
+    // browser overrides it for preview. Nothing to show = no pop-up.
+    const pub = (window.RRMI_CONTENT && window.RRMI_CONTENT.announcement) || {};
+    const local = getLS('rrmi_flash_cfg', null);
+    const cfg = (local && local.enabled !== false && (local.image || local.title || local.message))
+      ? local : (pub.show ? pub : null);
+    if (!cfg || !(cfg.image || cfg.title || cfg.message)) return;
+    const inner = document.getElementById('flashInner');
+    if (inner) {
+      inner.innerHTML = `${cfg.image ? `<img src="${esc(cfg.image)}" alt="${esc(cfg.title || 'Announcement')}">` : ''}
+        ${(cfg.title || cfg.message || cfg.link) ? `<div class="flash-text">
+          ${cfg.title ? `<h2>${esc(cfg.title)}</h2>` : ''}
+          ${cfg.message ? `<p>${esc(cfg.message)}</p>` : ''}
+          ${cfg.link ? `<a class="btn-primary" href="${esc(cfg.link)}">${esc(cfg.cta || 'Learn more')}</a>` : ''}
+        </div>` : ''}`;
+    }
 
     overlay.style.display = 'flex';
     sessionStorage.setItem('flash_shown', '1');
@@ -112,13 +121,17 @@
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
     if (hamburger && navLinks) {
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.setAttribute('aria-controls', 'navLinks');
       hamburger.addEventListener('click', () => {
         hamburger.classList.toggle('open');
-        navLinks.classList.toggle('open');
+        const open = navLinks.classList.toggle('open');
+        hamburger.setAttribute('aria-expanded', String(open));
       });
       navLinks.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => {
         hamburger.classList.remove('open');
         navLinks.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
       }));
     }
 
@@ -256,7 +269,7 @@
       const d = new Date(s.date);
       const dateStr = isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
       const thumb = s.thumbnail || (s.youtube ? `https://img.youtube.com/vi/${encodeURIComponent(s.youtube)}/hqdefault.jpg` : '');
-      return `<div class="sermon-card reveal-up">
+      return `<div class="sermon-card">
         <div class="sermon-thumb">
           ${thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
           <div class="sermon-play">
@@ -290,15 +303,23 @@
   function renderEvents() {
     const grid = document.getElementById('eventsGrid');
     if (!grid) return;
-    const events = getLS('rrmi_events', SEED.events);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const events = getContent('events', 'rrmi_events')
+      .filter(ev => { const d = new Date(ev.date + 'T00:00:00'); return !isNaN(d) && d >= today; });
     const sorted = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+    grid.classList.toggle('is-empty', !sorted.length);
+    if (!sorted.length) {
+      grid.innerHTML = emptyState('calendar', 'No events announced yet',
+        'Upcoming programmes, conventions and special services will be listed here. Our weekly services run as usual.');
+      return;
+    }
 
     grid.innerHTML = sorted.slice(0, 4).map((ev, i) => {
-      const d = new Date(ev.date);
+      const d = new Date(ev.date + 'T00:00:00');
       const day = d.getDate();
-      const mon = d.toLocaleString('en', { month: 'short' }).toUpperCase();
-      const featured = ev.featured || i === 0;
-      return `<div class="event-card ${featured ? 'featured' : ''} reveal-up delay-${i % 2}">
+      const mon = d.toLocaleString('en', { month: 'short' });
+      const featured = !!ev.featured;
+      return `<div class="event-card ${featured ? 'featured' : ''}">
         <div class="event-date-col">
           <span class="ev-day">${day}</span>
           <span class="ev-mon">${mon}</span>
@@ -307,9 +328,10 @@
           <span class="event-tag">${esc(ev.category || 'Church')}</span>
           <h3 class="event-title">${esc(ev.title)}</h3>
           <p class="event-meta">
-            <strong>${ev.time || 'TBA'}</strong> · ${esc(ev.location || '')}
+            <span>${esc(ev.time || 'Time to be announced')}</span>
+            ${ev.location ? `<span>${esc(ev.location)}</span>` : ''}
           </p>
-          ${featured ? `<div class="event-countdown" id="cd_${ev.id}" data-date="${ev.date}"></div>` : ''}
+          ${featured ? `<div class="event-countdown" data-date="${esc(ev.date)}"></div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -324,12 +346,12 @@
         const target = new Date(el.dataset.date + 'T00:00:00');
         const now = new Date();
         let diff = target - now;
-        if (diff <= 0) { el.innerHTML = '<span class="cd-item"><span class="cd-num">🎉</span><span class="cd-label">Today!</span></span>'; return; }
+        if (diff <= 0) { el.innerHTML = '<span class="cd-today">Happening today</span>'; return; }
         const d = Math.floor(diff / 86400000);
         const h = Math.floor((diff % 86400000) / 3600000);
         const m = Math.floor((diff % 3600000) / 60000);
         const s = Math.floor((diff % 60000) / 1000);
-        el.innerHTML = [['Days', d], ['Hrs', h], ['Min', m], ['Sec', s]].map(([l, v]) =>
+        el.innerHTML = [['days', d], ['hours', h], ['minutes', m]].map(([l, v]) =>
           `<div class="cd-item"><span class="cd-num">${v}</span><span class="cd-label">${l}</span></div>`
         ).join('');
       }
@@ -361,7 +383,7 @@
       slider.classList.add('is-empty');
       slider.innerHTML = emptyState('quote', 'Testimonies coming soon',
         'Has God done something wonderful in your life? We would love to hear it and, with your permission, share it here.',
-        '<a href="#contact" class="btn-primary sm-empty">Share Your Testimony</a>');
+        '<a href="#contact" class="btn-primary sm-empty">Share your testimony</a>');
       if (dotsWrap) dotsWrap.innerHTML = '';
       return;
     }
@@ -485,6 +507,66 @@
   }
 
   /* ── FORMS ─────────────────────────────────────────── */
+  const CHURCH_WHATSAPP = '2348030949380';
+  const CHURCH_EMAIL = 'redemptionrevivalministryintl@gmail.com';
+  function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  function showSuccess(form) {
+    const ok = form.querySelector('.form-success');
+    if (ok) { ok.style.display = 'block'; setTimeout(() => { ok.style.display = 'none'; }, 8000); }
+  }
+  function initContactForms() {
+    const prayer = document.getElementById('prayerForm');
+    if (prayer) prayer.addEventListener('submit', e => {
+      e.preventDefault();
+      const lines = ['Prayer request from the RRMI website', '',
+        'Name: ' + val('prayerName')];
+      if (val('prayerPhone')) lines.push('Phone: ' + val('prayerPhone'));
+      if (val('prayerEmail')) lines.push('Email: ' + val('prayerEmail'));
+      if (val('prayerCategory')) lines.push('Category: ' + val('prayerCategory'));
+      const priv = document.getElementById('prayerPrivate');
+      if (priv && priv.checked) lines.push('Please keep this private (pastoral team only).');
+      lines.push('', val('prayerRequest'));
+      window.open('https://wa.me/' + CHURCH_WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
+      showSuccess(prayer); prayer.reset();
+    });
+    const contact = document.getElementById('contactForm');
+    if (contact) contact.addEventListener('submit', e => {
+      e.preventDefault();
+      const subject = val('cSubject') || 'Message from the RRMI website';
+      const body = val('cMessage') + '\n\n' + val('cName') + '\n' + val('cEmail');
+      window.location.href = 'mailto:' + CHURCH_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      showSuccess(contact); contact.reset();
+    });
+    const news = document.getElementById('newsletterForm');
+    if (news) news.addEventListener('submit', e => {
+      e.preventDefault();
+      const email = (news.querySelector('input[type="email"]') || {}).value || '';
+      window.location.href = 'mailto:' + CHURCH_EMAIL + '?subject=' + encodeURIComponent('Please add me to the RRMI mailing list') +
+        '&body=' + encodeURIComponent('Please add ' + email + ' to the RRMI mailing list for devotionals, sermon updates and event news.');
+      news.reset();
+    });
+  }
+
+  /* ── GIVING DETAILS (content.js) ───────────────────── */
+  function initGiving() {
+    const g = (window.RRMI_CONTENT && window.RRMI_CONTENT.giving) || {};
+    const box = document.getElementById('bankDetails');
+    const btn = document.getElementById('copyAccountBtn');
+    if (!box || !g.accountNumber) return;
+    box.innerHTML = `<dl class="bank-dl">
+        ${g.bankName ? `<div><dt>Bank</dt><dd>${esc(g.bankName)}</dd></div>` : ''}
+        ${g.accountName ? `<div><dt>Account name</dt><dd>${esc(g.accountName)}</dd></div>` : ''}
+        <div><dt>Account number</dt><dd class="acct-no">${esc(g.accountNumber)}</dd></div>
+      </dl>`;
+    if (btn) {
+      btn.hidden = false;
+      btn.addEventListener('click', () => {
+        const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy account number'; }, 2000); };
+        if (navigator.clipboard) navigator.clipboard.writeText(g.accountNumber).then(done, () => {});
+      });
+    }
+  }
+
   function initForms() {
     document.querySelectorAll('form[data-form]').forEach(form => {
       form.addEventListener('submit', e => {
@@ -589,6 +671,8 @@
     initGallery();
     initGive();
     initForms();
+    initContactForms();
+    initGiving();
     initLiveStream();
     initReveal();
     initCounters();
@@ -598,6 +682,8 @@
   // index.html buttons also carry inline onclick="filterGallery()/closeLightbox()/lbNav()";
   // the real handlers are attached above, these stubs just stop console errors.
   window.filterGallery = window.filterGallery || function () {};
+  window.toggleMenu = window.toggleMenu || function () {};
+  window.closeFlash = window.closeFlash || function () {};
   window.closeLightbox = window.closeLightbox || function () {};
   window.lbNav = window.lbNav || function () {};
 

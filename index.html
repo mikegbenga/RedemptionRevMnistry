@@ -8,14 +8,16 @@
 <meta property="og:title" content="Redemption Revival Ministry International">
 <meta property="og:description" content="A Spirit-filled ministry built on the Word of God — transforming lives in Port Harcourt and beyond.">
 <meta property="og:type" content="website">
-<meta name="theme-color" content="#100F33">
+<meta name="theme-color" content="#1636A8">
 <title>Redemption Revival Ministry International</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Plus+Jakarta+Sans:wght@300..800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Newsreader:ital,opsz,wght@1,6..72,400..500&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/images/logo-gold.png" type="image/png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to content</a>
 
 <!-- ═══════════════════ FLASH EVENT POPUP ═══════════════════ -->
 <div id="flashOverlay" class="flash-overlay" style="display:none">
@@ -44,7 +46,7 @@
       <li><a href="#livestream" class="nav-link">Live</a></li>
       <li><a href="#gallery" class="nav-link">Gallery</a></li>
       <li><a href="#contact" class="nav-link">Contact</a></li>
-      <li><a href="#give" class="nav-link btn-give-nav">Give Online</a></li>
+      <li><a href="#give" class="nav-link btn-give-nav">Give online</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMenu()">
       <span></span><span></span><span></span>
@@ -53,144 +55,61 @@
 </nav>
 
 <!-- ═══════════════════ HERO ═══════════════════ -->
+<main id="main">
 <section id="home" class="hero">
-  <div class="hero-slides" id="heroSlides">
-    <div class="hero-slide active" style="background-image:linear-gradient(135deg,#100F33 0%,#18174D 40%,#100F33 100%)"></div>
-    <div class="hero-slide" style="background-image:linear-gradient(135deg,#18174D 0%,#2A2775 40%,#100F33 100%)"></div>
-    <div class="hero-slide" style="background-image:linear-gradient(135deg,#100F33 0%,#18174D 60%,#1D1B58 100%)"></div>
-  </div>
-  <div class="hero-overlay"></div>
-  <!-- Animated particles -->
-  <canvas class="hero-canvas" id="heroCanvas"></canvas>
-  <!-- Gold cross motif -->
-  <div class="hero-cross-motif" aria-hidden="true">
-    <div class="cross-v"></div><div class="cross-h"></div>
-  </div>
-  <div class="hero-content">
-    <div class="hero-eyebrow reveal-hero">
-      <span class="eyebrow-line"></span>
-      <span>Welcome to RRMI</span>
-      <span class="eyebrow-line"></span>
-    </div>
-    <h1 class="hero-title reveal-hero delay-1">
-      Where <em>Redemption</em><br>Meets <em>Revival</em>
-    </h1>
-    <p class="hero-sub reveal-hero delay-2">
-      A Spirit-filled ministry transforming lives through the <br>uncompromising Word of God in Port Harcourt & beyond.
-    </p>
-    <div class="hero-ctas reveal-hero delay-3">
-      <a href="#livestream" class="btn-hero btn-primary-hero">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        Watch Live
-      </a>
-      <a href="#give" class="btn-hero btn-gold-hero">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-4H9l3-3 3 3h-2v4z"/></svg>
-        Give Online
-      </a>
-      <a href="#about" class="btn-hero btn-outline-hero">Join Us</a>
-    </div>
-    <div class="hero-service-info reveal-hero delay-4">
-      <div class="service-badge">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-        Sunday Service: 9:00 AM &nbsp;|&nbsp; Wednesday Bible Study: 6:00 PM
+  <div class="container hero-grid">
+    <div class="hero-content">
+      <h1 class="hero-title">Where Redemption meets Revival</h1>
+      <p class="hero-sub">A Spirit-filled church family on Rumuomoi Market Road, Port Harcourt, built on the uncompromising Word of God. Come as you are.</p>
+      <div class="hero-ctas">
+        <a href="#contact" class="btn-hero btn-gold-hero">Plan your visit</a>
+        <a href="#livestream" class="btn-hero btn-outline-hero">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          Watch live
+        </a>
       </div>
     </div>
-  </div>
-  <div class="hero-scroll-cue" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
-    <div class="scroll-wheel"></div>
-    <span>Scroll</span>
-  </div>
-  <!-- Slide dots -->
-  <div class="hero-dots">
-    <button class="hdot active" onclick="goSlide(0)"></button>
-    <button class="hdot" onclick="goSlide(1)"></button>
-    <button class="hdot" onclick="goSlide(2)"></button>
+    <aside class="service-board" aria-labelledby="boardTitle">
+      <h2 class="board-title" id="boardTitle">This week at RRMI</h2>
+      <ul class="board-list">
+        <li><span class="board-day">Sunday</span><span class="board-what">Worship service</span><span class="board-time">9:00 AM</span></li>
+        <li><span class="board-day">Wednesday</span><span class="board-what">Bible study</span><span class="board-time">6:00 PM</span></li>
+        <li><span class="board-day">Friday</span><span class="board-what">Night prayer</span><span class="board-time">10:00 PM</span></li>
+      </ul>
+      <div class="board-foot">
+        <p>No. 5 Rumuomoi Market Road,<br>off Psychiatric Hospital Road, Port Harcourt</p>
+        <a href="https://www.google.com/maps/search/?api=1&amp;query=No.+5+Rumuomoi+Market+Road%2C+Port+Harcourt" target="_blank" rel="noopener" class="board-link">Get directions</a>
+      </div>
+    </aside>
   </div>
 </section>
 
-<!-- ═══════════════════ SERVICE TICKER ═══════════════════ -->
-<div class="service-ticker">
-  <div class="ticker-track" id="tickerTrack">
-    <span>✦ Sunday Worship Service — 9:00 AM</span>
-    <span>✦ Wednesday Bible Study — 6:00 PM</span>
-    <span>✦ Friday Night Prayer — 10:00 PM</span>
-    <span>✦ #5 Rumuomoi Market Road, Off Psychiatric Hospital Road, Port Harcourt</span>
-    <span>✦ Call Us: 08030949380</span>
-    <span>✦ Sunday Worship Service — 9:00 AM</span>
-    <span>✦ Wednesday Bible Study — 6:00 PM</span>
-    <span>✦ Friday Night Prayer — 10:00 PM</span>
-    <span>✦ #5 Rumuomoi Market Road, Off Psychiatric Hospital Road, Port Harcourt</span>
-    <span>✦ Call Us: 08030949380</span>
-  </div>
-</div>
-
 <!-- ═══════════════════ ABOUT ═══════════════════ -->
 <section id="about" class="section about-section">
-  <div class="container">
-    <div class="about-grid">
-      <div class="about-visual reveal-left">
-        <div class="about-logo-frame">
-          <img src="assets/images/logo-blue.png" alt="RRMI Crest" class="about-logo-img">
-          <div class="logo-gold-ring"></div>
-        </div>
-        <div class="about-stats">
-          <div class="stat-item">
-            <span class="stat-num" data-target="15">0</span><span class="stat-suf">+</span>
-            <span class="stat-label">Years of Ministry</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-num" data-target="500">0</span><span class="stat-suf">+</span>
-            <span class="stat-label">Active Members</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-num" data-target="12">0</span><span class="stat-suf"></span>
-            <span class="stat-label">Ministries</span>
-          </div>
-        </div>
-      </div>
-      <div class="about-content reveal-right">
-        <div class="section-eyebrow">About Our Ministry</div>
-        <h2 class="section-title">Built on the <em>Uncompromising<br>Word of God</em></h2>
-        <div class="gold-rule"></div>
-        <p class="about-body">Redemption Revival Ministry International is a Spirit-filled, Word-based ministry founded on the apostolic mandate to revive souls and transform communities through the power of Jesus Christ.</p>
-        <p class="about-body">Located in Port Harcourt, Rivers State, we are a church family committed to authentic worship, life-transforming teaching, and community impact — raising a generation that walks in the fullness of God's purpose.</p>
-        <div class="about-pillars">
-          <div class="pillar">
-            <div class="pillar-icon">✦</div>
-            <div>
-              <strong>The Word</strong>
-              <p>Uncompromising biblical teaching</p>
-            </div>
-          </div>
-          <div class="pillar">
-            <div class="pillar-icon">✦</div>
-            <div>
-              <strong>The Spirit</strong>
-              <p>Authentic Spirit-led worship</p>
-            </div>
-          </div>
-          <div class="pillar">
-            <div class="pillar-icon">✦</div>
-            <div>
-              <strong>Community</strong>
-              <p>Transforming lives & families</p>
-            </div>
-          </div>
-        </div>
-        <a href="#contact" class="btn-primary">Visit Us <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-      </div>
+  <div class="container about-grid">
+    <div class="about-content">
+      <h2 class="section-title">Built on the uncompromising Word of God</h2>
+      <p class="about-body">Redemption Revival Ministry International is a Spirit-filled, Word-based ministry founded on the apostolic mandate to revive souls and transform communities through the power of Jesus Christ.</p>
+      <p class="about-body">Located in Port Harcourt, Rivers State, we are a church family committed to authentic worship, life-transforming teaching, and community impact — raising a generation that walks in the fullness of God's purpose.</p>
+      <dl class="about-stats">
+        <div class="stat-item"><dt class="stat-label">Years of ministry</dt><dd class="stat-num">15+</dd></div>
+        <div class="stat-item"><dt class="stat-label">Members</dt><dd class="stat-num">500+</dd></div>
+        <div class="stat-item"><dt class="stat-label">Ministries</dt><dd class="stat-num">12</dd></div>
+      </dl>
     </div>
+    <ul class="about-pillars">
+      <li class="pillar"><strong>The Word</strong><p>Uncompromising biblical teaching, Sunday and midweek.</p></li>
+      <li class="pillar"><strong>The Spirit</strong><p>Authentic, Spirit-led worship and prayer.</p></li>
+      <li class="pillar"><strong>Community</strong><p>Transforming lives, marriages and families.</p></li>
+    </ul>
   </div>
 </section>
 
 <!-- ═══════════════════ PASTOR WELCOME ═══════════════════ -->
 <section id="pastor" class="section pastor-section">
-  <div class="pastor-bg-motif" aria-hidden="true"></div>
   <div class="container">
     <div class="pastor-grid">
-      <div class="pastor-photo-col reveal-left">
+      <div class="pastor-photo-col">
         <div class="pastor-frame">
           <img src="assets/images/pastor.jpg" alt="Pastor Itoro Isaac James" class="pastor-img" loading="lazy">
           <div class="pastor-caption">
@@ -200,12 +119,9 @@
             </div>
           </div>
         </div>
-        <div class="pastor-quote-mark" aria-hidden="true">"</div>
       </div>
-      <div class="pastor-text-col reveal-right">
-        <div class="section-eyebrow">A Word from Our Leader</div>
-        <h2 class="section-title">Welcome to <em>Redemption<br>Revival Ministry</em></h2>
-        <div class="gold-rule"></div>
+      <div class="pastor-text-col">
+        <h2 class="section-title">Welcome to Redemption Revival Ministry</h2>
         <blockquote class="pastor-quote">
           "God has called us not merely to church attendance, but to a life of radical transformation. At RRMI, you will encounter the living God — in His Word, in worship, and in community. You are not just welcome here; you are expected."
         </blockquote>
@@ -223,54 +139,52 @@
 <!-- ═══════════════════ MINISTRIES ═══════════════════ -->
 <section id="ministries" class="section ministries-section">
   <div class="container">
-    <div class="section-header center reveal-up">
-      <div class="section-eyebrow">Our Ministries</div>
-      <h2 class="section-title">A Place for <em>Everyone</em></h2>
-      <div class="gold-rule center"></div>
+    <div class="section-header center">
+      <h2 class="section-title">A place for everyone</h2>
       <p class="section-sub">Every ministry at RRMI is a gateway to purpose, community, and spiritual growth.</p>
     </div>
     <div class="ministries-grid">
-      <div class="ministry-card reveal-up">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
         <h3>Worship Ministry</h3>
         <p>Ushering the congregation into authentic, transformative worship encounters with God.</p>
       </div>
-      <div class="ministry-card reveal-up delay-1">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
         <h3>Bible Study</h3>
         <p>Deep, systematic exploration of Scripture that builds faith and equips believers for daily life.</p>
       </div>
-      <div class="ministry-card reveal-up delay-2">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
         <h3>Prayer Ministry</h3>
         <p>A house of prayer — interceding for individuals, families, the church, and the nation.</p>
       </div>
-      <div class="ministry-card reveal-up">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg></div>
         <h3>Children's Ministry</h3>
         <p>Building a solid spiritual foundation in the next generation through fun, faith-filled programmes.</p>
       </div>
-      <div class="ministry-card reveal-up delay-1">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
         <h3>Youth Ministry</h3>
         <p>Raising on-fire, purpose-driven young people who lead with integrity and boldness.</p>
       </div>
-      <div class="ministry-card reveal-up delay-2">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></div>
         <h3>Marriage & Family</h3>
         <p>Strengthening homes and marriages through godly counsel and community fellowship.</p>
       </div>
-      <div class="ministry-card reveal-up">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg></div>
         <h3>Women's Ministry</h3>
         <p>Empowering women to walk boldly in their God-given identity, gifts, and calling.</p>
       </div>
-      <div class="ministry-card reveal-up delay-1">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
         <h3>Men's Ministry</h3>
         <p>Raising men of God who are strong, servant-hearted leaders at home and in society.</p>
       </div>
-      <div class="ministry-card reveal-up delay-2">
+      <div class="ministry-card">
         <div class="min-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
         <h3>Missions & Outreach</h3>
         <p>Taking the Gospel beyond four walls — reaching communities, cities, and nations.</p>
@@ -282,18 +196,16 @@
 <!-- ═══════════════════ SERMONS ═══════════════════ -->
 <section id="sermons" class="section sermons-section">
   <div class="container">
-    <div class="section-header center reveal-up">
-      <div class="section-eyebrow">The Word</div>
-      <h2 class="section-title">Latest <em>Sermons</em></h2>
-      <div class="gold-rule center"></div>
+    <div class="section-header center">
+      <h2 class="section-title">Latest sermons</h2>
       <p class="section-sub">Feed your spirit with life-changing messages from the Word of God.</p>
     </div>
     <div class="sermons-grid" id="sermonsGrid">
       <!-- Filled by JS from localStorage or defaults -->
     </div>
-    <div class="section-cta reveal-up">
+    <div class="section-cta">
       <a href="https://www.youtube.com/@itoroisaac5655" target="_blank" rel="noopener" class="btn-outline">
-        View All Sermons on YouTube
+        View all sermons on YouTube
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></svg>
       </a>
     </div>
@@ -303,10 +215,8 @@
 <!-- ═══════════════════ EVENTS ═══════════════════ -->
 <section id="events" class="section events-section">
   <div class="container">
-    <div class="section-header center reveal-up">
-      <div class="section-eyebrow">What's Coming</div>
-      <h2 class="section-title">Upcoming <em>Events</em></h2>
-      <div class="gold-rule center"></div>
+    <div class="section-header center">
+      <h2 class="section-title">Upcoming events</h2>
     </div>
     <div class="events-grid" id="eventsGrid">
       <!-- Filled by JS -->
@@ -316,15 +226,13 @@
 
 <!-- ═══════════════════ LIVE STREAM ═══════════════════ -->
 <section id="livestream" class="section live-section">
-  <div class="live-bg"></div>
   <div class="container">
     <div class="live-grid">
-      <div class="live-info reveal-left">
+      <div class="live-info">
         <div class="live-badge">
-          <span class="live-dot"></span> LIVE EVERY SUNDAY
+          <span class="live-dot"></span> Live every Sunday
         </div>
-        <h2 class="section-title light">Watch Us <em>Live</em></h2>
-        <div class="gold-rule"></div>
+        <h2 class="section-title light">Watch us live</h2>
         <p class="live-body">Can't make it in person? Join us live from anywhere in the world. Experience the anointed Word and worship from RRMI.</p>
         <div class="live-schedule">
           <div class="ls-item">
@@ -353,7 +261,7 @@
           </a>
         </div>
       </div>
-      <div class="live-player reveal-right">
+      <div class="live-player">
         <div class="player-wrap">
           <div class="player-frame">
             <iframe
@@ -367,7 +275,7 @@
             <div class="player-overlay" id="playerOverlay">
               <div class="player-offline">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                <p>Live Stream begins at service time</p>
+                <p>The live stream starts at service time</p>
                 <div class="live-countdown" id="liveCountdown"></div>
               </div>
             </div>
@@ -381,12 +289,10 @@
 <!-- ═══════════════════ GALLERY ═══════════════════ -->
 <section id="gallery" class="section gallery-section">
   <div class="container">
-    <div class="section-header center reveal-up">
-      <div class="section-eyebrow">Our Gallery</div>
-      <h2 class="section-title">Life at <em>RRMI</em></h2>
-      <div class="gold-rule center"></div>
+    <div class="section-header center">
+      <h2 class="section-title">Life at RRMI</h2>
     </div>
-    <div class="gallery-filters reveal-up">
+    <div class="gallery-filters">
       <button class="gf-btn active" data-filter="all" onclick="filterGallery('all',this)">All</button>
       <button class="gf-btn" data-filter="worship" onclick="filterGallery('worship',this)">Worship</button>
       <button class="gf-btn" data-filter="events" onclick="filterGallery('events',this)">Events</button>
@@ -408,13 +314,10 @@
 
 <!-- ═══════════════════ PRAYER REQUEST ═══════════════════ -->
 <section id="prayer" class="section prayer-section">
-  <div class="prayer-bg"></div>
   <div class="container">
     <div class="prayer-grid">
-      <div class="prayer-info reveal-left">
-        <div class="section-eyebrow light">Prayer & Faith</div>
-        <h2 class="section-title light">We <em>Pray</em><br>With You</h2>
-        <div class="gold-rule"></div>
+      <div class="prayer-info">
+        <h2 class="section-title light">We pray with you</h2>
         <p class="prayer-body">Nothing is too great or too small to bring before God. Submit your prayer request and our dedicated prayer team will stand in agreement with you.</p>
         <div class="prayer-promise">
           <blockquote>"The effectual fervent prayer of a righteous man availeth much."</blockquote>
@@ -427,28 +330,28 @@
           </a>
           <a href="mailto:redemptionrevivalministryintl@gmail.com" class="prayer-link">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-            Email Us
+            Email us
           </a>
         </div>
       </div>
-      <div class="prayer-form-wrap reveal-right">
-        <form class="prayer-form" id="prayerForm" onsubmit="submitPrayer(event)">
-          <h3>Submit Your Prayer Request</h3>
+      <div class="prayer-form-wrap">
+        <form class="prayer-form" id="prayerForm">
+          <h3>Send a prayer request</h3>
           <div class="form-group">
-            <input type="text" id="prayerName" placeholder="Your Full Name" required>
-            <label>Full Name</label>
+            <input type="text" id="prayerName" placeholder="e.g. Grace Okon" required>
+            <label for="prayerName">Full name</label>
           </div>
           <div class="form-group">
-            <input type="tel" id="prayerPhone" placeholder="Phone Number">
-            <label>Phone (optional)</label>
+            <input type="tel" id="prayerPhone" placeholder="080…">
+            <label for="prayerPhone">Phone (optional)</label>
           </div>
           <div class="form-group">
-            <input type="email" id="prayerEmail" placeholder="Email Address">
-            <label>Email (optional)</label>
+            <input type="email" id="prayerEmail" placeholder="you@example.com">
+            <label for="prayerEmail">Email (optional)</label>
           </div>
           <div class="form-group">
-            <select id="prayerCategory">
-              <option value="">Prayer Category</option>
+            <select id="prayerCategory" aria-label="Prayer category">
+              <option value="">Prayer category</option>
               <option>Healing & Health</option>
               <option>Financial Breakthrough</option>
               <option>Family & Relationships</option>
@@ -460,7 +363,7 @@
           </div>
           <div class="form-group">
             <textarea id="prayerRequest" placeholder="Share your prayer request..." rows="4" required></textarea>
-            <label>Prayer Request</label>
+            <label for="prayerRequest">Prayer request</label>
           </div>
           <label class="checkbox-wrap">
             <input type="checkbox" id="prayerPrivate">
@@ -468,10 +371,10 @@
           </label>
           <button type="submit" class="btn-primary full-w">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            Send Prayer Request
+            Send on WhatsApp
           </button>
           <div class="form-success" id="prayerSuccess" style="display:none">
-            🙏 Your prayer request has been received. Our team will pray with you!
+            WhatsApp has opened with your request. Press send there and our prayer team will receive it.
           </div>
         </form>
       </div>
@@ -482,30 +385,27 @@
 <!-- ═══════════════════ GIVE / DONATION ═══════════════════ -->
 <section id="give" class="section give-section">
   <div class="container">
-    <div class="section-header center reveal-up">
-      <div class="section-eyebrow">Kingdom Finance</div>
-      <h2 class="section-title">Give to <em>God's Kingdom</em></h2>
-      <div class="gold-rule center"></div>
+    <div class="section-header center">
+      <h2 class="section-title">Give to God's kingdom</h2>
       <p class="section-sub">"Bring the whole tithe into the storehouse." — Malachi 3:10</p>
     </div>
     <div class="give-cards" id="giveCards">
       <!-- Filled by JS -->
     </div>
-    <div class="give-bank-info reveal-up">
+    <div class="give-bank-info">
       <div class="bank-card">
         <div class="bank-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M12 2 20 7H4z"/></svg></div>
-        <h4>Bank Transfer</h4>
+        <h4>Bank transfer</h4>
         <div class="bank-details" id="bankDetails">
-          <p>Account details will be displayed here.</p>
-          <p>Contact us at <strong>08030949380</strong> for banking information.</p>
+          <p>Call or WhatsApp <strong>08030949380</strong> for our account details.</p>
         </div>
-        <button class="btn-outline sm" onclick="copyAccount()">Copy Account Number</button>
+        <button type="button" class="btn-outline sm" id="copyAccountBtn" hidden>Copy account number</button>
       </div>
       <div class="bank-card">
         <div class="bank-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg></div>
-        <h4>Online Giving</h4>
+        <h4>Online giving</h4>
         <p class="bank-details">We accept multiple payment methods. Contact us for our secure online giving platform link.</p>
-        <a href="tel:+2348030949380" class="btn-outline sm">Contact for Payment Link</a>
+        <a href="tel:+2348030949380" class="btn-outline sm">Ask for the payment link</a>
       </div>
     </div>
     <p class="give-footer-note">All giving is processed securely. For enquiries: <a href="mailto:redemptionrevivalministryintl@gmail.com">redemptionrevivalministryintl@gmail.com</a></p>
@@ -515,10 +415,8 @@
 <!-- ═══════════════════ TESTIMONIALS ═══════════════════ -->
 <section id="testimonials" class="section testimonials-section">
   <div class="container">
-    <div class="section-header center reveal-up">
-      <div class="section-eyebrow">God's Faithfulness</div>
-      <h2 class="section-title"><em>Testimonies</em></h2>
-      <div class="gold-rule center"></div>
+    <div class="section-header center">
+      <h2 class="section-title">Testimonies</h2>
     </div>
     <div class="testi-slider" id="testiSlider">
       <!-- Filled by JS -->
@@ -530,17 +428,15 @@
 <!-- ═══════════════════ CONTACT ═══════════════════ -->
 <section id="contact" class="section contact-section">
   <div class="container">
-    <div class="section-header center reveal-up">
-      <div class="section-eyebrow">Get in Touch</div>
-      <h2 class="section-title">Find & <em>Contact Us</em></h2>
-      <div class="gold-rule center"></div>
+    <div class="section-header center">
+      <h2 class="section-title">Find and contact us</h2>
     </div>
     <div class="contact-grid">
-      <div class="contact-info reveal-left">
+      <div class="contact-info">
         <div class="contact-card">
           <div class="cc-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
           <div>
-            <h4>Our Location</h4>
+            <h4>Our location</h4>
             <p>No. 5 Rumuomoi Market Road,<br>Off Psychiatric Hospital Road,<br>Port Harcourt, Rivers State, Nigeria.</p>
           </div>
         </div>
@@ -561,7 +457,7 @@
         <div class="contact-card">
           <div class="cc-icon"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
           <div>
-            <h4>Service Times</h4>
+            <h4>Service times</h4>
             <p>Sunday: 9:00 AM — Noon<br>Wednesday: 6:00 PM — 8:00 PM<br>Friday Night Prayer: 10:00 PM</p>
           </div>
         </div>
@@ -583,39 +479,39 @@
           </a>
         </div>
       </div>
-      <div class="contact-form-wrap reveal-right">
-        <form class="contact-form" id="contactForm" onsubmit="submitContact(event)">
-          <h3>Send Us a Message</h3>
+      <div class="contact-form-wrap">
+        <form class="contact-form" id="contactForm">
+          <h3>Send us a message</h3>
           <div class="form-row">
             <div class="form-group">
-              <input type="text" id="cName" placeholder="Full Name" required>
-              <label>Full Name</label>
+              <input type="text" id="cName" placeholder="e.g. Grace Okon" required>
+              <label for="cName">Full name</label>
             </div>
             <div class="form-group">
-              <input type="email" id="cEmail" placeholder="Email Address" required>
-              <label>Email</label>
+              <input type="email" id="cEmail" placeholder="you@example.com" required>
+              <label for="cEmail">Email</label>
             </div>
           </div>
           <div class="form-group">
             <input type="text" id="cSubject" placeholder="Subject">
-            <label>Subject</label>
+            <label for="cSubject">Subject</label>
           </div>
           <div class="form-group">
             <textarea id="cMessage" placeholder="Your message..." rows="5" required></textarea>
-            <label>Message</label>
+            <label for="cMessage">Message</label>
           </div>
           <button type="submit" class="btn-primary full-w">
-            Send Message
+            Email this message
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
           </button>
           <div class="form-success" id="contactSuccess" style="display:none">
-            ✅ Message sent! We'll get back to you shortly.
+            Your email app has opened with this message. Press send there to reach us.
           </div>
         </form>
       </div>
     </div>
     <!-- Map -->
-    <div class="map-wrap reveal-up">
+    <div class="map-wrap">
       <iframe
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3975.6!2d7.0095!3d4.8156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNMKwNDgnNTYuMiJOIDfCsDAwJzM0LjIiRQ!5e0!3m2!1sen!2sng!4v1"
         width="100%" height="350" style="border:0" allowfullscreen="" loading="lazy"
@@ -628,18 +524,20 @@
 <!-- ═══════════════════ NEWSLETTER ═══════════════════ -->
 <section class="newsletter-section">
   <div class="container">
-    <div class="newsletter-inner reveal-up">
+    <div class="newsletter-inner">
       <div class="nl-text">
-        <h3>Stay Connected to the Ministry</h3>
-        <p>Receive devotionals, sermon updates, and event announcements.</p>
+        <h3>Stay connected</h3>
+        <p>Get devotionals, sermon updates and event news by email.</p>
       </div>
-      <form class="nl-form" onsubmit="subscribeNewsletter(event)">
-        <input type="email" placeholder="Enter your email address" required>
-        <button type="submit" class="btn-gold">Subscribe</button>
+      <form class="nl-form" id="newsletterForm">
+        <input type="email" placeholder="Your email address" aria-label="Your email address" required>
+        <button type="submit" class="btn-gold">Join the mailing list</button>
       </form>
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- ═══════════════════ FOOTER ═══════════════════ -->
 <footer class="footer">
@@ -669,11 +567,11 @@
           </div>
         </div>
         <div class="footer-links-col">
-          <h5>Quick Links</h5>
+          <h5>Quick links</h5>
           <ul>
             <li><a href="#home">Home</a></li>
-            <li><a href="#about">About Us</a></li>
-            <li><a href="#pastor">Our Pastor</a></li>
+            <li><a href="#about">About us</a></li>
+            <li><a href="#pastor">Our pastor</a></li>
             <li><a href="#ministries">Ministries</a></li>
             <li><a href="#sermons">Sermons</a></li>
             <li><a href="#events">Events</a></li>
@@ -682,20 +580,20 @@
         <div class="footer-links-col">
           <h5>Connect</h5>
           <ul>
-            <li><a href="#livestream">Live Stream</a></li>
+            <li><a href="#livestream">Live stream</a></li>
             <li><a href="#gallery">Gallery</a></li>
-            <li><a href="#prayer">Prayer Request</a></li>
-            <li><a href="#give">Give Online</a></li>
+            <li><a href="#prayer">Prayer request</a></li>
+            <li><a href="#give">Give online</a></li>
             <li><a href="#testimonials">Testimonies</a></li>
-            <li><a href="#contact">Contact Us</a></li>
+            <li><a href="#contact">Contact us</a></li>
           </ul>
         </div>
         <div class="footer-contact-col">
-          <h5>Visit Us</h5>
+          <h5>Visit us</h5>
           <p>No. 5 Rumuomoi Market Road,<br>Off Psychiatric Hospital Road,<br>Port Harcourt, Rivers State, Nigeria.</p>
           <p><a href="tel:+2348030949380"><svg class="ico-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 08030949380</a></p>
-          <p><a href="mailto:redemptionrevivalministryintl@gmail.com"><svg class="ico-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Email Us</a></p>
-          <a href="admin.html" class="admin-link">Admin Panel →</a>
+          <p><a href="mailto:redemptionrevivalministryintl@gmail.com"><svg class="ico-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Email us</a></p>
+          <a href="admin.html" class="admin-link">Admin panel</a>
         </div>
       </div>
     </div>
@@ -703,7 +601,7 @@
   <div class="footer-bottom">
     <div class="container">
       <p>© <span id="footerYear"></span> Redemption Revival Ministry International. All Rights Reserved.</p>
-      <p>Built with ❤️ for the Kingdom of God</p>
+      <p>Built for the Kingdom of God</p>
     </div>
   </div>
 </footer>
